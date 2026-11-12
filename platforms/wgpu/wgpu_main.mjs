@@ -1,10 +1,9 @@
 	import * as THREE from 'three/webgpu';
 
 	import { color, objectPosition, screenUV, 
-		uniform, vec2, pass, linearDepth, normalWorld, triplanarTexture, texture, viewportLinearDepth, viewportDepthTexture, viewportSharedTexture, mx_worley_noise_float, positionWorld, time } from 'three/tsl';
+		uniform, vec2, pass } from 'three/tsl';
 	
 	import { outline } from 'three/addons/tsl/display/OutlineNode.js';
-	// import { PostProcessing } from 'three/addons/nodes/PostProcessing.js';
 
 	import { gaussianBlur } from 'three/addons/tsl/display/GaussianBlurNode.js';
 
@@ -12,11 +11,13 @@
 
 	import { bloom } from 'three/addons/tsl/display/BloomNode.js';
 
-
 	import { LoadPrimaryAudioHowl, PlayTriggerWithTag, ReturnAudioGroupsData, isPlaying } from '../../../connect/media.js';
+
 	import { settings } from '../../../connect/settings.js';
-	// import { SetTimeKeysData, eventEl } from '../../../connect/events.js';
-	import { userData, stringRoomUsers, mySocketID } from '../../../connect/connect.js';
+
+	import { userData } from '../../../connect/connect.js';
+
+	import { mySocketID, stringRoomUsers } from '../../connect/socket.js';
 
 	import { InitPathfinding, agents } from './wgpu_nav.js';
 

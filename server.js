@@ -238,7 +238,9 @@ io.on('connection', function(socket) {
     } else {
         console.log(chalk.red("socket " + socket.uname + " " + socket.color + "connected"));
     }
-
+    socket.on('signal', ({ room, data }) => {
+        socket.to(room).emit('signal', data);
+    });
     socket.on('join', function(rm) {
         console.log(chalk.yellow(socket.uname + " " + socket.color + " tryna join " + rm));
         socket.join(rm);

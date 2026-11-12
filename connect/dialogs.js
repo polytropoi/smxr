@@ -7,14 +7,14 @@ import { dequip_event, equip_inventory_object_event, drop_inventory_object_event
 import { settings, profile } from "./settings.js";
 // import { eventEl } from "./events.js";
 import { room, lerp, sceneLocations, localData, ReturnLocationTable, 
-  userData, stringRoomUsers, avatarName, ToggleTransformControls, sceneModels, PlayerToLocation, ExportMods, ImportMods, SendInvitation, getExtension, SaveModToLocal,
+  userData, avatarName, ToggleTransformControls, sceneModels, PlayerToLocation, ExportMods, ImportMods, SendInvitation, getExtension, SaveModToLocal,
   GoToNext, GoToPrevious, CreateLocationAframe, SaveModsToCloud, SnapLocation, SendChatMessage, ReturnAttributions,
   Disconnect,
   SaveTimekeysToLocal,
   CreateLocationAlt, videoEl
   } from "./connect.js";
 import { hasLocalData, SaveLocalData, ConvertAndSaveLocalFile, InitLocalFiles, DeleteLocalSceneData, DeleteLocalProfileData, formatAsByteString, DeleteFile, UpdateLocalPlayerState, UpdateLocalEquipment } from "./indexedDb.js";
-
+import { stringRoomUsers } from "../connect/socket.js";
 
 let eventEl = document.getElementById("eventEl");
 export let showDialogPanel = false;

@@ -12,6 +12,9 @@ import { SetTimedEventsListenerMode, timeKeysData, SetTimeKeysData, SetPrimaryAu
 import { settings, profile, mods } from "../connect/settings.js";
 
 
+import { socket, mySocketID, roomUsers, stringRoomUsers } from "../connect/socket.js";
+
+
 /////////////////// main onload function, populate settings, etc. and some client-side utils & modding functions
 export let room = window.location.pathname.split("/").pop(); //just the string after last slash (short code)
 // var player = document.getElementById("player");
@@ -33,8 +36,8 @@ export const sceneEl = document.querySelector('a-scene'); //related to problem..
 export const lerp = (x, y, a) => x * (1 - a) + y * a;
 
 var dateString = Date.now().toString();
-export let roomUsers = {};
-export let stringRoomUsers;
+// export let roomUsers = {};
+// export let stringRoomUsers;
 export let userProfile;
 
 export let playerPosition;
@@ -52,9 +55,9 @@ var currentIndex = 0;
 let avatarNameEl = document.querySelector(".avatarName"); //make this actual uid?  //aframe only
 // let avatarName = "";
 let playFrames = false;
-let isConnected = false;
+
 export let userData = {};
-export let mySocketID = "";
+
 let emitInterval = null;
 let lastPosition = "";
 let lastRotation = "";
@@ -98,12 +101,12 @@ let mouseDownStarttime = 0;
 export let mouseDowntime = 0;
 let isFiring = false;
 let busy = false;  //prevent double on savetocloud..
-var token = document.getElementById("token").getAttribute("data-token"); 
+export var token = document.getElementById("token").getAttribute("data-token"); 
 // var localtoken = localStorage.getItem("smToken"); //rem all localstorage!
-let socketHost = "http://localhost:3000";
-let liveKitHost = "http://localhost:8000";
-// let socketHost = null;
-var socket = null; //the socket.io instance below
+export let socketHost = "http://localhost:3000";
+// // let liveKitHost = "http://localhost:8000";
+// // let socketHost = null;
+// export let socket = null; //the socket.io instance below
 // let cloudData = {};
 
 
@@ -380,28 +383,7 @@ export function InitConnect() {
          // envEl.components.enviro_mods.loadPreset("moon");
       }
    }
-   // if (settings.sceneCameraMode && settings.sceneCameraMode == "Follow Path" || settings.sceneTags && settings.sceneTags.includes("curve")) {
 
-   // }
-   // this.asky = document.getElementsByTagName('a-sky')[0];
-   // if (this.asky && settings) {
-   //   console.log("tryna mod asky radius " + settings.sceneSkyRadius);
-   //   // this.asky1 = this.askies[0];
-   //   this.asky.setAttribute("radius", settings.sceneSkyRadius);
-   //   let skybox = document.getElementById("skybox");
-   //   if (skybox) {
-   //     let skyrad = settings.sceneSkyRadius - 2;
-   //     console.log("tryna mod asky radius " + skyrad);
-   //     skybox.setAttribute("radius", skyrad); //in case using reflection and enviro is on..
-   //   } else {
-   //     let skyboxD = document.getElementById("skybox_dynamic");
-   //     if (skyboxD) {
-   //       let skyradD = settings.sceneSkyRadius - 2;
-   //       console.log("tryna mod asky radius " + skyradD);
-   //       skyboxD.setAttribute("radius", skyradD); //in case using reflection and enviro is on..
-   //     }
-   //   }
-   // }
    let sceneGreetingDialogEl = document.getElementById("sceneGreetingDialog");
    if (sceneGreetingDialogEl) {
 
@@ -442,40 +424,6 @@ export function InitConnect() {
       });
    }
 
-   // player.addEventListener("obbcollisionstarted", function (e) {
-   //    if (e.detail) {
-   //       console.log("obbcollision start  " + e.detail.withEl.id); 
-   //       if ((e.detail.withEl.id.toString() == "player") || (e.detail.withEl.components && (e.detail.withEl.components.cloud_marker || e.detail.withEl.components.local_marker))) {
-   //       // if (e.detail.withEl.id.toString() == "player") {
-            
-   //          let index = intersections.indexOf(e.detail.withEl.id);
-   //          console.log("got obbcollision hit " + e.detail.withEl.id + " index " + index);
-   //          if (index == -1) {
-   //             intersections.push(e.detail.withEl.id);
-   //             console.log("obb collision start with " + e.detail.withEl.id + " intersect index " + index + " " + intersections);
-   //             if (intersections.indexOf("player") != -1) {
-   //                for (let i = 0; i < intersections.length; i++) {
-   //                   if (intersections[i] != "player") {
-   //                      let el = document.getElementById(intersections[i]);
-   //                      if (el) {
-   //                         if (el.components.cloud_marker) {
-   //                            el.components.cloud_marker.playerTriggerHit();
-   //                                                    break;
-   //                         } else if (el.components.local_marker) {
-   //                            el.components.local_marker.playerTriggerHit();
-   //                                                    break;
-   //                         }
-   //                      }
-
-   //                   }
-   //                }
-   //             }
-   //          }
-   //       //   }  
-   //       }
-   //    }
-   //  });
-   
    if (player) {
       
     player.addEventListener("obbcollisionended", function (e) { //used in AFRAME scenes
@@ -493,18 +441,10 @@ export function InitConnect() {
             }
          }
       }); 
-   }
-    
-
-
-
+   }  
 } //end onload
 
-// export function UpdateUserProfile (profile) {
-//    userProfile = profile;
-//    console.log("userProfile for " + profile.avatarName);
-//    // profileLoaded(profile);
-// }
+
 
 export function SetPlayerToLastPosition () { //hrm, need an event for this...
    if (settings && settings.sceneTags && settings.sceneTags.includes("last position")) {
@@ -538,7 +478,7 @@ $('#previousButton').on('click', function(e) {
    GoToPrevious();
 });
 
-$('a-entity').each(function() {  //external way of getting click duration for physics
+$('a-entity').each(function() {  //external way of getting click duration for physics - aframe only, move elsewhere...
 
    $(this).bind('mousedown', function() {
      mouseDownStarttime = Date.now() / 1000;
@@ -585,96 +525,73 @@ export function getExtension(filename) {
    return (i < 0) ? '' : filename.substr(i);
 }
 
-export async function GetMatrixData() { //use matrix.org for... something
-   if (!matrixClient) {
-      let opts = {}; //um no
-      matrixClient = matrixcs.createClient("https://matrix.org");
-   }
-   await matrixClient.startClient({ initialSyncLimit: 10 });
-      if (!matrixRoomsData) {
-         matrixClient.publicRooms(function (err, data) { //pulls 100 random rooms
-            if (err) {
-               console.error("err %s", JSON.stringify(err));
-               return;
-            }
-            // matrixRoomsData = data;
-            console.log("Congratulations! The matrix client got " + data.chunk.length + " rooms.");
-      
-            // const matrixMeshEl = document.getElementById("matrix_meshes");
-            // if (matrixMeshEl != null) {
-            //    const matrixMeshComponent = matrixMeshEl.components.matrix_meshes;
-            //    if (matrixMeshComponent != null) {  
-                  let length = data.chunk.length;
-                  console.log("matrix length " + length);
-                  let trimToLength = length < 100 ? length : 75;
-                  let trimmedLength = length;
-                  let trimmedIndexes = [];
-                  let randomIndex = 0;
-                  for (let i = 0; i < length; i++) {
-                     randomIndex = Math.floor(Math.random()*data.chunk.length);
-                     // console.log("pushing randomIndex " + randomIndex);
-                     // trimmedIndexes.push(randomIndex);
-                     data.chunk.splice(randomIndex, 1)
-                     if (i === length - 1) {
-                        //sweeeet...
-                        // matrixMeshComponent.loadRoomData(data.chunk.splice(trimmedIndexes, 1)); 
-                        console.log("returning data " + JSON.stringify(data));
-                        return data;
-                     }
-                  } 
-            //    } else {
-            //       console.log("matrix component not found!");
-            //    }
-            // } else {
-            //    console.log("matrixEl not found!");
-            // }
-         });
-      } else {
-         const matrixMeshEl = document.getElementById("matrix_meshes");
-         if (matrixMeshEl != null) {
-            const matrixMeshComponent = matrixMeshEl.components.matrix_meshes;
-            if (matrixMeshComponent != null) {  
-               let length = matrixRoomsData.chunk.length;
-               let trimToLength = 99;
-               let trimmedLength = length - trimToLength;
-               let trimmedIndexes = [];
-               let randomIndex = 0;
-               for (let i = 0; i < trimmedLength; i++) {
-                  randomIndex = Math.floor(Math.random()*matrixRoomsData.chunk.length);
-                  // console.log("pushing randomIndex " + randomIndex);
-                  // trimmedIndexes.push(randomIndex);
-                  matrixRoomsData.chunk.splice(randomIndex, 1)
-                  if (i === trimmedLength - 1) {
-                     //sweeeet...
-                     // matrixMeshComponent.loadRoomData(data.chunk.splice(trimmedIndexes, 1)); 
-                     matrixMeshComponent.loadRoomData(matrixRoomsData);   
-                  }
-               } 
-            }
-         }
-
-      }   
-   }
-// }
-
-// export function SetTimeKeysData (tkData) {
-//    timeKeysData = tkData;
-// }
-// export function MediaTimeUpdate (timeString) {
-//    // console.log("MediaTimeUpdate " + fancyTimeString);
-//    // transportTimeStatsEl = document.getElementById("transportStats");
-//    if (transportTimeStatsEl == null) {
-//       transportTimeStatsEl = document.getElementById("transportStats");
-//    } else {
-//       transportTimeStatsEl.innerHTML = timeString;
+// export async function GetMatrixData() { //use matrix.org for... something
+//    if (!matrixClient) {
+//       let opts = {}; //um no
+//       matrixClient = matrixcs.createClient("https://matrix.org");
 //    }
-//    modalTimeStatsEl = document.getElementById('modalTimeStats');
-//    if (modalTimeStatsEl == null) {
+//    await matrixClient.startClient({ initialSyncLimit: 10 });
+//       if (!matrixRoomsData) {
+//          matrixClient.publicRooms(function (err, data) { //pulls 100 random rooms
+//             if (err) {
+//                console.error("err %s", JSON.stringify(err));
+//                return;
+//             }
+//             // matrixRoomsData = data;
+//             console.log("Congratulations! The matrix client got " + data.chunk.length + " rooms.");
+      
+//             // const matrixMeshEl = document.getElementById("matrix_meshes");
+//             // if (matrixMeshEl != null) {
+//             //    const matrixMeshComponent = matrixMeshEl.components.matrix_meshes;
+//             //    if (matrixMeshComponent != null) {  
+//                   let length = data.chunk.length;
+//                   console.log("matrix length " + length);
+//                   let trimToLength = length < 100 ? length : 75;
+//                   let trimmedLength = length;
+//                   let trimmedIndexes = [];
+//                   let randomIndex = 0;
+//                   for (let i = 0; i < length; i++) {
+//                      randomIndex = Math.floor(Math.random()*data.chunk.length);
+//                      // console.log("pushing randomIndex " + randomIndex);
+//                      // trimmedIndexes.push(randomIndex);
+//                      data.chunk.splice(randomIndex, 1)
+//                      if (i === length - 1) {
+//                         //sweeeet...
+//                         // matrixMeshComponent.loadRoomData(data.chunk.splice(trimmedIndexes, 1)); 
+//                         console.log("returning data " + JSON.stringify(data));
+//                         return data;
+//                      }
+//                   } 
+//          });
 //       } else {
-//          modalTimeStatsEl.innerHTML = timeString;
-//       }
-      
+//          const matrixMeshEl = document.getElementById("matrix_meshes");
+//          if (matrixMeshEl != null) {
+//             const matrixMeshComponent = matrixMeshEl.components.matrix_meshes;
+//             if (matrixMeshComponent != null) {  
+//                let length = matrixRoomsData.chunk.length;
+//                let trimToLength = 99;
+//                let trimmedLength = length - trimToLength;
+//                let trimmedIndexes = [];
+//                let randomIndex = 0;
+//                for (let i = 0; i < trimmedLength; i++) {
+//                   randomIndex = Math.floor(Math.random()*matrixRoomsData.chunk.length);
+//                   // console.log("pushing randomIndex " + randomIndex);
+//                   // trimmedIndexes.push(randomIndex);
+//                   matrixRoomsData.chunk.splice(randomIndex, 1)
+//                   if (i === trimmedLength - 1) {
+//                      //sweeeet...
+//                      // matrixMeshComponent.loadRoomData(data.chunk.splice(trimmedIndexes, 1)); 
+//                      matrixMeshComponent.loadRoomData(matrixRoomsData);   
+//                   }
+//                } 
+//             }
+//          }
+
+//       }   
 //    }
+
+
+
    
 function ReturnModelName (_id) {
    if (_id.toString().includes("primitive_")) {
@@ -1976,120 +1893,6 @@ function tcheck () {
    // }
 }
 
-if (sceneEl != null) {
-
-   // AFRAME.registerComponent('location_data', { //initial loading of "official" location data from cloud, embedded in server response
-   //    schema: {
-   //    initialized: {default: ''},
-   //    jsonData: {default: ''},
-   //    youtubePosition: {type: 'vec3', default: {x: 0, y: 1, z: -5}} 
-       
-   //    },
-   //    init: function() {
-
-   //          let theData = this.el.getAttribute('data-locations');
-   //          // console.log("location_data el" + this.el.id);
-   //          // let locations = [];
-   //          this.data.jsonData = JSON.parse(atob(theData)); //convert from base64
-   //          // this.rEl = null;
-   //          // if (localData != "") {
-   //          if (this.data.jsonData.length) {
-   //          for (let i = 0; i < this.data.jsonData.length; i++) {
-   //             let locItem = this.data.jsonData[i];
-   //             sceneLocations.locations.push(locItem);
-   //             // localData.locations.push(locItem);
-   //             if (locItem.markerType != undefined) {
-   //                if (locItem.markerType.toLowerCase().includes("youtube")) {
-   //                   this.data.youtubePosition.x = locItem.x;
-   //                   this.data.youtubePosition.y = locItem.y; 
-   //                   this.data.youtubePosition.z = locItem.z;
-   //                   // console.log("YOTUBE POSOTION: " +JSON.stringify(this.data.youtubePosition));
-   //                }
-   //                if (locItem.markerType == "poi") {
-   //                   let nextbuttonEl = document.getElementById('nextButton');
-   //                   let prevbuttonEl = document.getElementById('previousButton');
-   //                   nextbuttonEl.style.visibility = "visible";
-   //                   prevbuttonEl.style.visibility = "visible";
-   //                   poiLocations.push(locItem);
-   //                }
-   //                if (locItem.markerType == "curve point") {
-   //                   // let nextbuttonEl = document.getElementById('nextButton');
-   //                   // let prevbuttonEl = document.getElementById('previousButton');
-   //                   // nextbuttonEl.style.visibility = "visible";
-   //                   // prevbuttonEl.style.visibility = "visible";
-   //                   curveLocations.push(locItem);
-   //                }
-   //                if (locItem.markerType.toLowerCase().includes("placeholder") ||
-   //                   locItem.markerType.toLowerCase().includes("poi") ||
-   //                   // locItem.markerType.toLowerCase().includes("poi") ||
-   //                   locItem.markerType.toLowerCase().includes("gate") || 
-   //                   locItem.markerType.toLowerCase().includes("portal") || 
-   //                   locItem.markerType.toLowerCase().includes("mailbox") || 
-   //                   locItem.markerType.toLowerCase().includes("waypoint")) {
-   //                   cloudMarkers.push(locItem);
-                  
-   //                }
-            
-   //             }
-   //             if (i == this.data.jsonData.length - 1) {
-   //                sceneEl.removeAttribute("keyboard-shortcuts");
-   //                // if (settings.allowMods) {
-   //                   this.waitAndInitLocalDB();     
-   //                   console.log("poiLocations " + JSON.stringify(poiLocations));        
-   //                   // InitIDB();
-   //                // }
-   //             }
-   //          }
-   //       } else {
-   //          if (!AFRAME.utils.device.isMobile()) {
-   //             InitIDB();
-   //          } else {
-   //             InitCurves(); //this is called from InitDB above if not mobile
-   //          }
-   //       }
-          
-   //    }, 
-   //    returnYouTubePosition: function() {
-   //       return this.data.youtubePosition;
-   //    },
-   //    waitAndInitLocalDB: function () {
-   //       setTimeout( function() {
-   //          if (settings && settings.allowMods && !AFRAME.utils.device.isMobile()) {
-   //             InitIDB();
-   //          }
-   //       }, 3000);
-   //    },
-   //    // applyLocalDataToCloudElement: function (locationKey) {
-   //    //    for 
-   //    // },
-   //    updateSceneLocationData: function() {
-
-   //       let thedata = JSON.parse(JSON.stringify(localData.locations));
-   //    // let length = thedata.length;
-   //    console.log(thedata.length + " local sceneLocations " + JSON.stringify(thedata));
-   //    //    console.log(JSON.stringify(sceneLocations));
-   //       for (let i = 0; thedata.length; i++) {
-   //          // UpdateLocation(sceneLocations.locations[i]);
-   //          if (thedata[i] != undefined) {
-   //             let ts = sceneLocations.locations[i].phID;
-   //             let rEl = document.getElementById(ts);
-   //             if (rEl) {
-   //                console.log("gotsa element with id " + JSON.stringify(thedata[i]));
-   //                // let obj = rEl.getObject3D('mesh');
-   //                // obj.position.set({x: sceneLocations.locations[i].x, y: sceneLocations.locations[i].y, z: sceneLocations.locations[i].z });
-   //                // obj.rotation.set({x: sceneLocations.locations[i].eulerx, y: sceneLocations.locations[i].eulery, z: sceneLocations.locations[i].eulerz });
-   //                //    // obj.scale.set({x: sceneLocations.locations[i].markerObjScale, y: sceneLocations.locations[i].markerObjScale, z: sceneLocations.locations[i].markerObjScale});
-   //                // rEl.setAttribute("position", {x: sceneLocations.locations[i].x, y: sceneLocations.locations[i].y, z: sceneLocations.locations[i].z });
-   //                // rEl.setAttribute("rotation", {x: sceneLocations.locations[i].eulerx, y: sceneLocations.locations[i].eulery, z: sceneLocations.locations[i].eulerz });
-   //                // rEl.setAttribute("scale", {x: sceneLocations.locations[i].markerObjScale, y: sceneLocations.locations[i].markerObjScale, z: sceneLocations.locations[i].markerObjScale});
-   //             }
-   //          }
-   //       }
-   //    }
-   // });
-
-
-}
 
 function ShowHideUI () {
    uiVisible = !uiVisible;
@@ -2201,23 +2004,7 @@ $(document).on("click","#prev",function(){
    $(".screen-overlay").backstretch("prev");
 });
 
-// window.onclick = function(event) { //click outside modal to close
-//    if (event.target == theModal && event.target != modalContent) {
-//      theModal.style.display = "none";
-//    }
-//  }
-// var HideMobileKeyboard = function() {
-// 	document.activeElement.blur();
-// 	$("input").blur();
-// };
 
-//  var modalCloser = document.getElementById("modalCloser"); //or the close button
-//  if (modalCloser != null) {
-//    modalCloser.addEventListener('click', function() {
-//       theModal.style.display = "none";
-//       HideMobileKeyboard();
-//    });
-// }
 
 var closer = document.getElementById("adSquareCloseButton");
    if (closer != null) {
@@ -2295,354 +2082,293 @@ function getParameterByName(name, url) {
    return decodeURIComponent(results[2].replace(/\+/g, " "));
 }
 
-function RandomHexColor() {
+export function RandomHexColor() {
    return  "#000000".replace(/0/g,function(){return (~~(Math.random()*16)).toString(16);});
 }
 
-// async function InitLiveKit() {
-//    const room = new LivekitClient.Room();
-//    // let url = "wss://smxr-m9z9nvrk.livekit.cloud";
-//    let url = liveKitHost;
-//    let token = settings.liveKitToken;
-//    // let token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MTEwNjI0OTIsImlzcyI6IkFQSVp6a1VvY1hMeWIyViIsIm5iZiI6MTcxMTA2MTU5Miwic3ViIjoicG9seXRyb3BvaSIsInZpZGVvIjp7ImNhblB1Ymxpc2giOnRydWUsImNhblB1Ymxpc2hEYXRhIjp0cnVlLCJjYW5TdWJzY3JpYmUiOnRydWUsInJvb20iOiJ0ZXN0cm9vbTJiIiwicm9vbUpvaW4iOnRydWV9fQ.sn9b33OYbM2TTRYNx3eznWrasgnLJCI02NeAhkr-Rc4";
-//    // call this some time before actually connecting to speed up the actual connection
-//    room.prepareConnection(url, token);
-//    room
-//    .on(LivekitClient.RoomEvent.TrackSubscribed, handleTrackSubscribed)
-//    .on(LivekitClient.RoomEvent.TrackUnsubscribed, handleTrackUnsubscribed)
-//    .on(LivekitClient.Participant.ActiveSpeakersChanged, handleActiveSpeakerChange)
-//    .on(LivekitClient.RoomEvent.Disconnected, handleDisconnect)
-//    .on(LivekitClient.RoomEvent.LocalTrackUnpublished, handleLocalTrackUnpublished);
-//    await room.connect(url, token);
-//    console.log('connected to livekit room ' + room.name);
-//    // publish local camera and mic tracks
-//    await room.localParticipant.enableCameraAndMicrophone();
+      // export function InitSocket () {
+      // if (settings && !socket) {
+      //    const aColor = RandomHexColor();
+      //    console.log ("tryna InitSocket with color " + aColor);
 
-// }
-// function handleTrackSubscribed(
-//   track,
-//   publication,
-//   participant,
-// ) {
-//    console.log("gotsa livekit track subscription " + track.kind);
-//   if (track.kind === Track.Kind.Video || track.kind === Track.Kind.Audio) {
-//     // attach it to a new HTMLVideoElement or HTMLAudioElement
-
-//     const element = track.attach();
-//     parentElement.appendChild(element);
-//   }
-// }
-
-// function handleTrackUnsubscribed(
-//   track,
-//   publication,
-//   participant,
-// ) {
-//   // remove tracks from all attached elements
-//   track.detach();
-// }
-
-// function handleLocalTrackUnpublished(
-//   publication,
-//   participant,
-// ) {
-//   // when local tracks are ended, update UI to remove them from rendering
-//   publication.track.detach();
-// }
-
-// function handleActiveSpeakerChange(speakers) {
-//   // show UI indicators when participant is speaking
-// }
-
-// function handleDisconnect() {
-//   console.log('disconnected from room');
-// }
-
-
-
-export function InitSocket () {
-if (settings && !socket) {
-   const aColor = RandomHexColor();
-   console.log ("tryna InitSocket with color " + aColor);
-
-   socket = io.connect(socketHost, {
-         query : {
-            token: token,
-            uname: avatarName,
-            color: aColor,
-            room: room
-         },
-         url: socketHost + "/socket.io/?EIO=4&transport=polling&t=NNjNltH",
-         autoConnect: true,  //connection is opened if token checks out above
-         reconnection: true,
-         reconnectionAttempts: 5,        // Limit total reconnection attempts to 5
-         reconnectionDelay: 1000,        // Start by waiting 1 second before retrying
-         reconnectionDelayMax: 5000,     // Never wait more than 5 seconds between retries
-         randomizationFactor: 0.5,
-         transports: ['websocket']
-         });      
-      }
-
-   socket.on('connect', function() {
-   
-      isConnected = true;
-      console.log("tryna join " + avatarName + " socketID " + socket.id);
-      mySocketID = socket.id;
-      socket.emit('join', room, avatarName, "web");
-      const disconnectButton = document.getElementById("disconnectButton");
-      disconnectButton.removeAttribute("hidden");
-   
-   });
-
-   socket.on("connect_error", (err) => {
-      console.log(`Connection error due to: ${err.message}`);
-   });
-
-      // Triggered when all reconnection attempts have failed
-   socket.io.on("reconnect_failed", () => {
-      console.log("Failed to reconnect after maximum attempts.");
-   // Example: Show a "Connection Lost. Click to retry" button to the user
-   });
-
-   // Optional: Track individual attempts as they happen
-   socket.io.on("reconnect_attempt", (attemptNumber) => {
-      console.log(`Reconnection attempt #${attemptNumber}`);
-   });
-
-   socket.on('user joined', function(data) {
-      console.log("room user " + data + 'joined room ' + room);
-      socket.emit('room users', room);
-      const roomUsersString = ReturnRoomUsersString(roomUsers);
-      UpdatePlayerAvatars(roomUsers, roomUsersString);
-      // EmitSelfPosition();
-   });
-
-   socket.on('admin message', function (data) {
-      console.log('recieved admin message : ' + data + ' in room ' + room);
-      if (data.toString().toLowerCase() == "next") {
-         GoToNext();
-      }
-   });
-
-   socket.on('room users', function (data) {
-    console.log("room users data : " + data);
-      $('#users').html("");
-
-      roomUsers = JSON.parse(data);
-
-      // let roomUsersString = "";
-      // console.log("room users count = " +roomUsers.length);
-      // let usercount = 0;
-  
-            var keys = Object.keys(roomUsers);
-            let userCount = keys.length;
-      //       let simpleUsers = [];
-      //       for(var i=0; i<keys.length; i++){
-      //          var key = keys[i];
-      //          var isMe = "";
-      //          // console.log(key, roomUsers[key]);
-      //          if (key === socket.id) {
-      //             isMe = "*";
-      //             localRoomUser = roomUsers[key];
-      //             // console.log("key isMe " + key);
-      //          }
-      //          const value = roomUsers[key];
-               
-      //          if (value.includes("~")) {
-      //             let split = value.split("~"); //color is appended to username
-      //             split[0] = split[0].replace("_", " ");
-      //             roomUsersString += isMe + "<a href=\x22#\x22 class=\x22tooltip\x22 style=\x22color:"+split[1]+"\x22>"+ split[0]+"<span class=\x22tooltiptext\x22>"+split[0]+"</span></a>, ";
-      //             let u = {};
-      //             u.name = split[0];
-      //             u.color = split[1];
-
-      //             simpleUsers.push(u);
-      //          } else {
-      //             roomUsersString += value + ", ";
-      //          } 
-      //          usercount++;
+      //    socket = io.connect(socketHost, {
+      //          query : {
+      //             token: token,
+      //             uname: avatarName,
+      //             color: aColor,
+      //             room: room
+      //          },
+      //          url: socketHost + "/socket.io/?EIO=4&transport=polling&t=NNjNltH",
+      //          autoConnect: true,  //connection is opened if token checks out above
+      //          reconnection: true,
+      //          reconnectionAttempts: 5,        // Limit total reconnection attempts to 5
+      //          reconnectionDelay: 1000,        // Start by waiting 1 second before retrying
+      //          reconnectionDelayMax: 5000,     // Never wait more than 5 seconds between retries
+      //          randomizationFactor: 0.5,
+      //          transports: ['websocket']
+      //          });      
       //       }
 
-      //       roomUsersString = roomUsersString.substring(0, roomUsersString.length - 2); //trim last comma and trailing space
-      //       roomUsersString = usercount + " users connected: " + roomUsersString;
+      //    socket.on('connect', function() {
+         
+      //       isConnected = true;
+      //       console.log("tryna join " + avatarName + " socketID " + socket.id);
+      //       mySocketID = socket.id;
+      //       socket.emit('join', room, avatarName, "web");
+      //       const disconnectButton = document.getElementById("disconnectButton");
+      //       disconnectButton.removeAttribute("hidden");
+         
+      //    });
 
-      const roomUsersString = ReturnRoomUsersString(roomUsers);
-      // console.log(roomUsersString);
-      $('#users').html(roomUsersString);
-      stringRoomUsers = roomUsersString;
-      UpdatePlayerAvatars(roomUsers, roomUsersString);
-      if (userCount > 0) {
-         const playerHudEl = document.getElementById("player_hud");
-         if (playerHudEl) {
-            if (playerHudEl.components.player_hud) {
-            playerHudEl.components.player_hud.ShowConnectedUsersAndHide(userCount, simpleUsers);
-            }
-         }
-      }
-      // $('#users_2').html(roomUsersString);
-      // EmitSelfPosition();
-   });
+      //    socket.on("connect_error", (err) => {
+      //       console.log(`Connection error due to: ${err.message}`);
+      //    });
 
-   
+      //       // Triggered when all reconnection attempts have failed
+      //    socket.io.on("reconnect_failed", () => {
+      //       console.log("Failed to reconnect after maximum attempts.");
+      //    // Example: Show a "Connection Lost. Click to retry" button to the user
+      //    });
 
-   socket.on('getbytes', function (data, metadata) {
-         //TODO split the incoming wad and build array(s) of pics, audio, etc based on metadata
-         console.log("tryna parse some bytes");
-   });
+      //    // Optional: Track individual attempts as they happen
+      //    socket.io.on("reconnect_attempt", (attemptNumber) => {
+      //       console.log(`Reconnection attempt #${attemptNumber}`);
+      //    });
 
-   socket.on('getpicframe', function (data, sid) {
+      //    socket.on('user joined', function(data) {
+      //       console.log("room user " + data + 'joined room ' + room);
+      //       socket.emit('room users', room);
+      //       const roomUsersString = ReturnRoomUsersString(roomUsers);
+      //       UpdatePlayerAvatars(roomUsers, roomUsersString);
+      //       // EmitSelfPosition();
+      //    });
 
+      //    socket.on('admin message', function (data) {
+      //       console.log('recieved admin message : ' + data + ' in room ' + room);
+      //       if (data.toString().toLowerCase() == "next") {
+      //          GoToNext();
+      //       }
+      //    });
+
+      //    socket.on('room users', function (data) {
+      //     console.log("room users data : " + data);
+      //       $('#users').html("");
+
+      //       roomUsers = JSON.parse(data);
+
+      //       // let roomUsersString = "";
+      //       // console.log("room users count = " +roomUsers.length);
+      //       // let usercount = 0;
       
-      console.log("getting pic frame from " + sid + " roomUsers " + JSON.stringify(roomUsers));
-      let userName = "";
-      var keys = Object.keys(roomUsers);
-      for(var i=0; i<keys.length; i++){
-         var key = keys[i];
-         console.log(key, roomUsers[key]);
-         if (keys[i] === sid) {
-            console.log(roomUsers[key] + " sent a pic frame!");
-            userName = roomUsers[key];
-         }
-      }   
-      // foreach(var user in roomUsers) {
-      //    if (user.key == socket.id) {
-      //       console.log(user.value + " sent a pic frame!");
-      //    }
-      
-      // }
-      var instance = $('body').data('backstretch');
-      var base64 = _arrayBufferToBase64(data);
-      var imgSrc = "data:image/jpg;base64," + base64;
-      // if (instance === undefined) {
-      //     pics.push(imgSrc);
-      //     // $(".screen-overlay").backstretch(pics, {duration: 1000, fade: 250});
-      //         $(".screen-overlay").backstretch(imgSrc);
-      // } 
-      // $(".screen-overlay").backstretch("destroy", true);
-      // $(".screen-overlay").backstretch(pics);
-      // $(".screen-overlay").backstretch(imgSrc, {fade: 250});
-      // $('#future').prepend($('<span style=\x22margin: 5px 5px 5px 5px;\x22 class=\x22smallfont_lightyellow\x22>').text( "<"+ userName + " <a id="+socket.id+" href=\x22#\x22>sent a pic</a>").append("</span><hr>"));
-      $('#future').prepend($("<span style=\x22margin: 5px 5px 5px 5px;\x22 class=\x22smallfont_lightyellow\x22>-"+ userName + " <button class=\x22btn picbutton\x22 id="+sid+" href=\x22#\x22>sent a pic</button></span><hr>"));
-      UpdateContentBox();
-         if (pics.length < 1) {
+      //             var keys = Object.keys(roomUsers);
+      //             let userCount = keys.length;
+      //       //       let simpleUsers = [];
+      //       //       for(var i=0; i<keys.length; i++){
+      //       //          var key = keys[i];
+      //       //          var isMe = "";
+      //       //          // console.log(key, roomUsers[key]);
+      //       //          if (key === socket.id) {
+      //       //             isMe = "*";
+      //       //             localRoomUser = roomUsers[key];
+      //       //             // console.log("key isMe " + key);
+      //       //          }
+      //       //          const value = roomUsers[key];
+                     
+      //       //          if (value.includes("~")) {
+      //       //             let split = value.split("~"); //color is appended to username
+      //       //             split[0] = split[0].replace("_", " ");
+      //       //             roomUsersString += isMe + "<a href=\x22#\x22 class=\x22tooltip\x22 style=\x22color:"+split[1]+"\x22>"+ split[0]+"<span class=\x22tooltiptext\x22>"+split[0]+"</span></a>, ";
+      //       //             let u = {};
+      //       //             u.name = split[0];
+      //       //             u.color = split[1];
+
+      //       //             simpleUsers.push(u);
+      //       //          } else {
+      //       //             roomUsersString += value + ", ";
+      //       //          } 
+      //       //          usercount++;
+      //       //       }
+
+      //       //       roomUsersString = roomUsersString.substring(0, roomUsersString.length - 2); //trim last comma and trailing space
+      //       //       roomUsersString = usercount + " users connected: " + roomUsersString;
+
+      //       const roomUsersString = ReturnRoomUsersString(roomUsers);
+      //       // console.log(roomUsersString);
+      //       $('#users').html(roomUsersString);
+      //       stringRoomUsers = roomUsersString;
+      //       UpdatePlayerAvatars(roomUsers, roomUsersString);
+      //       if (userCount > 0) {
+      //          const playerHudEl = document.getElementById("player_hud");
+      //          if (playerHudEl) {
+      //             if (playerHudEl.components.player_hud) {
+      //             playerHudEl.components.player_hud.ShowConnectedUsersAndHide(userCount, simpleUsers);
+      //             }
+      //          }
+      //       }
+      //       // $('#users_2').html(roomUsersString);
+      //       // EmitSelfPosition();
+      //    });
+
+         
+
+      //    socket.on('getbytes', function (data, metadata) {
+      //          //TODO split the incoming wad and build array(s) of pics, audio, etc based on metadata
+      //          console.log("tryna parse some bytes");
+      //    });
+
+      //    socket.on('getpicframe', function (data, sid) {
+
             
-            pics.push(imgSrc);
-            // picsBuffer = pics;
-            // console.log("pushing pic # " + pics.length);
-            if (!instance) {
-                  $(".screen-overlay").backstretch(pics, {duration: 1000, fade: 250});
-            }
-         } 
+      //       console.log("getting pic frame from " + sid + " roomUsers " + JSON.stringify(roomUsers));
+      //       let userName = "";
+      //       var keys = Object.keys(roomUsers);
+      //       for(var i=0; i<keys.length; i++){
+      //          var key = keys[i];
+      //          console.log(key, roomUsers[key]);
+      //          if (keys[i] === sid) {
+      //             console.log(roomUsers[key] + " sent a pic frame!");
+      //             userName = roomUsers[key];
+      //          }
+      //       }   
+      //       // foreach(var user in roomUsers) {
+      //       //    if (user.key == socket.id) {
+      //       //       console.log(user.value + " sent a pic frame!");
+      //       //    }
+            
+      //       // }
+      //       var instance = $('body').data('backstretch');
+      //       var base64 = _arrayBufferToBase64(data);
+      //       var imgSrc = "data:image/jpg;base64," + base64;
+      //       // if (instance === undefined) {
+      //       //     pics.push(imgSrc);
+      //       //     // $(".screen-overlay").backstretch(pics, {duration: 1000, fade: 250});
+      //       //         $(".screen-overlay").backstretch(imgSrc);
+      //       // } 
+      //       // $(".screen-overlay").backstretch("destroy", true);
+      //       // $(".screen-overlay").backstretch(pics);
+      //       // $(".screen-overlay").backstretch(imgSrc, {fade: 250});
+      //       // $('#future').prepend($('<span style=\x22margin: 5px 5px 5px 5px;\x22 class=\x22smallfont_lightyellow\x22>').text( "<"+ userName + " <a id="+socket.id+" href=\x22#\x22>sent a pic</a>").append("</span><hr>"));
+      //       $('#future').prepend($("<span style=\x22margin: 5px 5px 5px 5px;\x22 class=\x22smallfont_lightyellow\x22>-"+ userName + " <button class=\x22btn picbutton\x22 id="+sid+" href=\x22#\x22>sent a pic</button></span><hr>"));
+      //       UpdateContentBox();
+      //          if (pics.length < 1) {
+                  
+      //             pics.push(imgSrc);
+      //             // picsBuffer = pics;
+      //             // console.log("pushing pic # " + pics.length);
+      //             if (!instance) {
+      //                   $(".screen-overlay").backstretch(pics, {duration: 1000, fade: 250});
+      //             }
+      //          } 
 
-      if (picArrayIndex < 20) {
-      if (pics < picArrayIndex) {
-         pics.push(imgSrc);
-         // $(".screen-overlay").backstretch(imgSrc);
-      } else {
-         pics.splice(picArrayIndex, 1, imgSrc);  
-      }
-      picArrayIndex++;
-      } else {
-      picArrayIndex = 0;
-      pics.splice(picArrayIndex, 1, imgSrc);
-      picArrayIndex++;
-      }
+      //       if (picArrayIndex < 20) {
+      //       if (pics < picArrayIndex) {
+      //          pics.push(imgSrc);
+      //          // $(".screen-overlay").backstretch(imgSrc);
+      //       } else {
+      //          pics.splice(picArrayIndex, 1, imgSrc);  
+      //       }
+      //       picArrayIndex++;
+      //       } else {
+      //       picArrayIndex = 0;
+      //       pics.splice(picArrayIndex, 1, imgSrc);
+      //       picArrayIndex++;
+      //       }
 
-   });
+      //    });
 
-   socket.on('getaudiochunk', function (data){
-      console.log("messages data : " + data);
+      //    socket.on('getaudiochunk', function (data){
+      //       console.log("messages data : " + data);
 
-   });
+      //    });
 
-   socket.on('user messages', function(data1, data2, data3, data4) { //name, color, socketID, message
-         console.log("messages data : " + data1 + " " + data2 + " " + data3);
-         // $('#future').prepend($('<div class=\x22row bubble pull-left\x22 style=\x22margin: 5px 5px 5px 5px;\x22><span class=\x22smallfont_yellow\x22>').text( data1 + ": " + data2).append("</span></div>"));
-         // $('#future').prepend($('<span style=\x22margin: 5px 5px 5px 5px;\x22 class=\x22smallfont_lightyellow\x22>').text( "<"+ data1 + ": " + data2).append("</span>"));
-         $('#future').prepend("<div class=\x22messageBubbleIn\x22 style=\x22float: left; color: "+data2+";\x22>"+ data1 + ": " + data4 + "</div><br><br><br>");
-         if ($('#future li').length > 555) {
-            $('#future li').last().remove();
-         }
-         // UpdateContentBox();
-   });
+      //    socket.on('user messages', function(data1, data2, data3, data4) { //name, color, socketID, message
+      //          console.log("messages data : " + data1 + " " + data2 + " " + data3);
+      //          // $('#future').prepend($('<div class=\x22row bubble pull-left\x22 style=\x22margin: 5px 5px 5px 5px;\x22><span class=\x22smallfont_yellow\x22>').text( data1 + ": " + data2).append("</span></div>"));
+      //          // $('#future').prepend($('<span style=\x22margin: 5px 5px 5px 5px;\x22 class=\x22smallfont_lightyellow\x22>').text( "<"+ data1 + ": " + data2).append("</span>"));
+      //          $('#future').prepend("<div class=\x22messageBubbleIn\x22 style=\x22float: left; color: "+data2+";\x22>"+ data1 + ": " + data4 + "</div><br><br><br>");
+      //          if ($('#future li').length > 555) {
+      //             $('#future li').last().remove();
+      //          }
+      //          // UpdateContentBox();
+      //    });
 
-   socket.on('playerposition', function(uname, posX, posY, posZ, rotX, rotY, rotZ, socketID, source) {
-      console.log("player position data : " + uname + "x " + posX + " y " + posY + " z " + posZ + " rx " + rotX + " ry " + rotY + " rz " + rotZ + " sid " + socketID + " from " + source);
+      //    socket.on('playerposition', function(uname, posX, posY, posZ, rotX, rotY, rotZ, socketID, source) {
+      //       console.log("player position data : " + uname + "x " + posX + " y " + posY + " z " + posZ + " rx " + rotX + " ry " + rotY + " rz " + rotZ + " sid " + socketID + " from " + source);
 
 
-      if (settings.sceneType == "aframe") {
+      //       if (settings.sceneType == "aframe") {
 
-      
-         let pAvatar = document.getElementById(socketID);
-         // console.log("pAvatar is " + JSON.stringify(pAvatar));
-         // pAvatar.setAttribute('lerp', {'position': posObj, 'rotation': rotObj});
-         if (pAvatar != null) { //TODO Interpolation!
-            if (source == "unity") {
-               posZ = posZ * -1;
-            }
-            const posObj = {};
-            posObj.x = posX;
-            posObj.y = posY;
-            posObj.z = posZ;
-            const rotObj = {};
-            rotObj.x = rotX;
-            rotObj.y = rotY;
-            rotObj.z = rotZ;
-            // pAvatar.setAttribute('lerp', {'position': posObj, 'rotation': rotObj});
-            // const posRotObj = {position: posX + "," + posY + "," + posZ, rotation: rotX + "," + rotY + "," + rotZ};
-                  const posRotObj = {}
-                  posRotObj.position = posObj;
-                  posRotObj.rotation = rotObj;
-                  var mover = pAvatar.components.mover; //much easier
-                  // MoveElement(socketID, posRotObj);
-                  // const event = new CustomEvent('update_pos_rot', {detail: posRotObj}, false);
-                  // console.log("tryna dispatchEvent " + event);
-                  // pAvatar.dispatchEvent(event);
-                  mover.move(socketID, posObj, rotObj);
-            // pAvatar.setAttribute('position', posX + " " + posY + " " + posZ);
-            // pAvatar.setAttribute('rotation', rotX + " " + rotY + " " + rotZ);
-         } else {
-                  const roomUsersString = ReturnRoomUsersString(roomUsers);
-            UpdatePlayerAvatars(roomUsers, roomUsersString);
-         }
-      } else {
-         const avatarString = "avatar_" + socketID;
-         const sceneAvatar = avatars[avatarString];
-         if (sceneAvatar) {
-            if (socketID != socket.id) { //don't move yerself
-               console.log("gotsa avatar to move " + socketID);
+            
+      //          let pAvatar = document.getElementById(socketID);
+      //          // console.log("pAvatar is " + JSON.stringify(pAvatar));
+      //          // pAvatar.setAttribute('lerp', {'position': posObj, 'rotation': rotObj});
+      //          if (pAvatar != null) { //TODO Interpolation!
+      //             if (source == "unity") {
+      //                posZ = posZ * -1;
+      //             }
+      //             const posObj = {};
+      //             posObj.x = posX;
+      //             posObj.y = posY;
+      //             posObj.z = posZ;
+      //             const rotObj = {};
+      //             rotObj.x = rotX;
+      //             rotObj.y = rotY;
+      //             rotObj.z = rotZ;
+      //             // pAvatar.setAttribute('lerp', {'position': posObj, 'rotation': rotObj});
+      //             // const posRotObj = {position: posX + "," + posY + "," + posZ, rotation: rotX + "," + rotY + "," + rotZ};
+      //                   const posRotObj = {}
+      //                   posRotObj.position = posObj;
+      //                   posRotObj.rotation = rotObj;
+      //                   var mover = pAvatar.components.mover; //much easier
+      //                   // MoveElement(socketID, posRotObj);
+      //                   // const event = new CustomEvent('update_pos_rot', {detail: posRotObj}, false);
+      //                   // console.log("tryna dispatchEvent " + event);
+      //                   // pAvatar.dispatchEvent(event);
+      //                   mover.move(socketID, posObj, rotObj);
+      //             // pAvatar.setAttribute('position', posX + " " + posY + " " + posZ);
+      //             // pAvatar.setAttribute('rotation', rotX + " " + rotY + " " + rotZ);
+      //          } else {
+      //                   const roomUsersString = ReturnRoomUsersString(roomUsers);
+      //             UpdatePlayerAvatars(roomUsers, roomUsersString);
+      //          }
+      //       } else {
+      //          const avatarString = "avatar_" + socketID;
+      //          const sceneAvatar = avatars[avatarString];
+      //          if (sceneAvatar) {
+      //             if (socketID != socket.id) { //don't move yerself
+      //                console.log("gotsa avatar to move " + socketID);
 
-               const avatarData = {'type': 'move', 'posX': posX, 'posY': posY, 'posZ': posZ, 'rotX': rotX, 'rotY': rotY, 'rotZ': rotZ, 'socketID': socketID}
+      //                const avatarData = {'type': 'move', 'posX': posX, 'posY': posY, 'posZ': posZ, 'rotX': rotX, 'rotY': rotY, 'rotZ': rotZ, 'socketID': socketID}
 
-               MoveAvatarEvent(avatarData);
-            }
-         // } else {
-            const roomUsersString = ReturnRoomUsersString(roomUsers);
-            UpdatePlayerAvatars(roomUsers, roomUsersString);
-         }
+      //                MoveAvatarEvent(avatarData);
+      //             }
+      //          // } else {
+      //             const roomUsersString = ReturnRoomUsersString(roomUsers);
+      //             UpdatePlayerAvatars(roomUsers, roomUsersString);
+      //          }
 
-      }
-      // EmitSelfPosition();
-   });
+      //       }
+      //       // EmitSelfPosition();
+      //    });
 
-   socket.on('selfplayerposition', function() {
-      let pAvatar = document.getElementById(mySocketID);
-      if (pAvatar != null) {
-         pAvatar.setAttribute('position', cameraPosition.x + " " + cameraPosition.y + " " + cameraPosition.z);
-      }
-   });
+      //    socket.on('selfplayerposition', function() {
+      //       let pAvatar = document.getElementById(mySocketID);
+      //       if (pAvatar != null) {
+      //          pAvatar.setAttribute('position', cameraPosition.x + " " + cameraPosition.y + " " + cameraPosition.z);
+      //       }
+      //    });
 
-   socket.on('disconnect', function() {
-      console.log("disconnect event! " + socket + "connected user count is now " + roomUsers.length);
-      const roomUsersString = ReturnRoomUsersString(roomUsers);
-      UpdatePlayerAvatars(roomUsers, roomUsersString);
-   });
-   socket.on('user left', function(id) {
-      console.log("user left with socket id " + id + " vs roomUsers " + JSON.stringify(roomUsers));
-      UpdatePlayerAvatars(roomUsers);
+      //    socket.on('disconnect', function() {
+      //       console.log("disconnect event! " + socket + "connected user count is now " + roomUsers.length);
+      //       const roomUsersString = ReturnRoomUsersString(roomUsers);
+      //       UpdatePlayerAvatars(roomUsers, roomUsersString);
+      //    });
+      //    socket.on('user left', function(id) {
+      //       console.log("user left with socket id " + id + " vs roomUsers " + JSON.stringify(roomUsers));
+      //       UpdatePlayerAvatars(roomUsers);
 
-   });
-} //InitSocket end
+      //    });
+      // } //InitSocket end
 
 export function ReturnRoomUsersString(roomUsers) {
       
@@ -2937,7 +2663,7 @@ export function Disconnect() {
    // document.querySelector("avatar").style.visibility = "hidden";
 }
 
-function UpdatePlayerAvatars(roomUsers, stringRoomUsers) { //aframe only, need to flex.. //no, just make this a component function, to avoid creating a-entities outside of aframe
+export function UpdatePlayerAvatars(roomUsers, stringRoomUsers) { //aframe only, need to flex.. //no, just make this a component function, to avoid creating a-entities outside of aframe
    console.log("tryna UpdatePlayerAvatars" + JSON.stringify(roomUsers));
    
    //////// hrm aframe mode, DEPRECATED

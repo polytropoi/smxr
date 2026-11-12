@@ -33,12 +33,14 @@ import {PlayPauseMedia, showDialogPanel} from '../../../connect/dialogs.js';
 
 
 
+
 // let  = new TransformControls(camera, renderer.domElement);
 // control.attach(objectToTransform);
 
 import * as nipplejs from '../../../main/js/nipple.mjs';
 import { ReturnTagForInstance } from './wgpu_instance.js';
-import { GoToNext, localData, mySocketID, playerRotation } from '../../connect/connect.js';
+import { GoToNext, localData, playerRotation } from '../../connect/connect.js';
+import { mySocketID } from '../../connect/socket.js';
 import { SaveLocalData } from '../../connect/indexedDb.js';
 import { SynthHit, synthKeys, synthTransports } from './wgpu_synths.js';
 import { CreateNewLocation, keydown } from '../../connect/dialogs.js';

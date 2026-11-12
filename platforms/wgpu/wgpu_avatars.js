@@ -1,9 +1,12 @@
 
 import * as THREE from 'three';
 
-import { userData, room, avatars, roomUsers, ReturnRoomUsersString } from '../../../connect/connect.js';
+import { userData, room, avatars, ReturnRoomUsersString } from '../../../connect/connect.js';
+
+import { roomUsers } from '../../../connect/socket.js';
 
 import { activeObjex, LoadModel } from './wgpu_locations.js';
+
 
 import { scene, loadingHeader } from './wgpu_main.mjs';
 // import { eventEl } from '../../../connect/events.js';
