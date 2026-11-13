@@ -17,12 +17,10 @@ import { timedEventsListenerMode, PauseIntervals, SetTimedEventsListenerMode, ti
 import { addButtons, addPlayButton, addSimplePlayButton } from './addButtons.mjs';
 
 import { LoadLocations, AddLocation, locationTokenContainer } from './vtt_locations.mjs';
-import { SetTimeKeysData, eventEl } from '../../../connect/events.js';
+import { SetTimeKeysData } from '../../../connect/events.js';
 import { poiLocations } from '../../../connect/connect.js';
 // import { keydown } from '../connect/dialogs.js';
 import { addAudioVizSelect } from './vtt_audioViz.mjs';
-
-
 export const app = new Application();
 export let sceneTags;
 
@@ -42,6 +40,7 @@ export let font3 = 'Acme';
 export let hasBgMap = false;
 export let hasAudioViz = false;
 
+const eventEl = document.getElementById("eventEl");
 const pathname = window.location.pathname;
 let scene_id = '';
 

@@ -3370,7 +3370,7 @@ pixi_router.get('/:_id', function (req, res) {
                         "</div>"+
                         videoEl+
                         videoElements+
-
+                        "<div id=\x22eventEl\x22></div>" +
                         "</body>\n" +
                     
                         "</html>";

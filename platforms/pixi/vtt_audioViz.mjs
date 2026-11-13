@@ -1,5 +1,5 @@
 import { Assets, Graphics, Container, Text } from 'pixi';
-import { eventEl } from '../../../connect/events.js';
+// import { eventEl } from '../../../connect/events.js';
 // import AudioMotionAnalyzer from 'https://cdn.skypack.dev/audiomotion-analyzer?min';
 import AudioMotionAnalyzer from '../../../main/js/audioMotion-analyzer.js';
 import { primaryAudioElement } from '../../../connect/media.js';
@@ -15,7 +15,7 @@ let presetIndex = -1;
 if (localStorage.getItem("audioVizMode")) {
 AudioVizMode(localStorage.getItem("audioVizMode"));
 }
-
+const eventEl = document.getElementById("eventEl");
 eventEl.addEventListener('audio-viz', onAudioVizInit);
 
 function onAudioVizInit(event) {
