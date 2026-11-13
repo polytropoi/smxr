@@ -3,7 +3,6 @@ import * as THREE from 'three';
 
 import { userInventory, ShowHideDialogPanel, GetUserInventoryAsync, uniqueItems } from '../../../connect/dialogs.js';
 
-import { eventEl } from '../../../connect/events.js';
 
 import { UpdateLocalPlayerState, UpdateLocalEquipment } from "../../../connect/indexedDb.js";
 
@@ -23,7 +22,7 @@ import { userData, room } from '../../../connect/connect.js';
 // import {  } from '../../connect/dialogs.js';
 // import { GetUserInventory } from '../../connect/dialogs.js';
 
-
+const eventEl = document.getElementById("eventEl");
 
 export let sceneInventory = [];
 

@@ -2,7 +2,7 @@
 
 	import { LoadPrimaryAudioHowl, PlayTriggerWithTag, ReturnAudioGroupsData, isPlaying } from '../../../connect/media.js';
 	import { settings } from '../../../connect/settings.js';
-	import { SetTimeKeysData, eventEl } from '../../../connect/events.js';
+	// import { SetTimeKeysData, eventEl } from '../../../connect/events.js';
 	import { userData } from '../../../connect/connect.js';
 
 	import { InitPathfinding, agents } from './wgl_nav.js';
@@ -37,8 +37,8 @@
 	
 	import { PlayPauseMedia } from '../../connect/dialogs.js';
 	
-	import { InstancedSprites } from '../wgl/wgl_fx.js';
-
+	// import { InstancedSprites } from '../wgl/wgl_fx.js';
+	const eventEl = document.getElementById("eventEl");
 
 
 	export let scene;
@@ -57,7 +57,7 @@
 	export let selectedObjects = [];
 
 	let physicsInstances;
-	let doPostProcessing = false; //only wgpu fn
+	// let doPostProcessing = false; //only wgpu fn
 	
 	
 	// export let activeObjex = []; //raycastable
@@ -433,10 +433,10 @@
 
 
 
-	export function togglePostProcessing () { //call after physics is done, elsewise... :(
+	export function togglePostProcessing () { //call after physics is done, elsewise... :(//nah, wgpu route only
 
-		doPostProcessing = !doPostProcessing;
-		console.log("tryna toggle post processing " + doPostProcessing + " but on webgl!?");
+		// doPostProcessing = !doPostProcessing;
+		// console.log("tryna toggle post processing " + doPostProcessing + " but on webgl!?");
 	}
 
 

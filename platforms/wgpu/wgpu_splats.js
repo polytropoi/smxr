@@ -41,7 +41,8 @@ export async function InitSplats () {
               
                 splat.position.set(splatObjex[i].locationData.x, splatObjex[i].locationData.y, splatObjex[i].locationData.z);
               
-                splat.rotation.set(xrot, yrot, Math.PI, 'XYZ');
+                // splat.rotation.set(xrot, yrot, Math.PI, 'XYZ');
+                // splat.rotation.x = Math.PI;
                 
                 // splat.scale.set(xscale, yscale * modFlip, zscale);
                 splat.scale.set(xscale, yscale, zscale);

@@ -1,7 +1,7 @@
 
 import { sceneLocations, GoToNext, GoToPrevious, videoEl, localData } from "../../connect/connect.js";
 import { primaryAudioEl, youtubeIsPlaying, primaryAudioHowl, MediaTimeUpdate, currentAudioFileName, fancyTimeFormat, updatePrimaryTransportSlider} from "../../connect/media.js";
-import { StartPopup } from "../platforms/wgpu/wgpu_ui.js";
+// import { StartPopup } from "../platforms/wgpu/wgpu_ui.js";
 import { LoadPrimaryAudioHowl } from "./media.js";
 import { settings } from "./settings.js";
 let timeKeysIndex = 0;

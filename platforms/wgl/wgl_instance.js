@@ -271,7 +271,7 @@ export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader
                 const scale = Math.random() * scaleFactor;
                 // const scale = 2;
                 dummy.scale.set(scale, scale, scale);
-                console.log("scaleFactor " + scaleFactor + " dummys cale is " +scale);
+                // console.log("scaleFactor " + scaleFactor + " dummys cale is " +scale);
             }
             
             if (locData.markerType == "character") {
@@ -289,7 +289,7 @@ export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader
                 if (surfaceType != "primitive") {
                     // console.log("instance count " + i);
                     if (position.y > waterLevel)  {
-                        console.log("above water instance count " + i);
+                        // console.log("above water instance count " + i);
                         instancedMeshes[m].setMatrixAt(i, dummy.matrix);
                         instancedMeshes[m].instanceMatrix.needsUpdate = true;
                     } else {

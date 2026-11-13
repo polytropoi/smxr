@@ -2,7 +2,7 @@ import { settings } from "../connect/settings.js";
 
 import { MoveAvatarEvent } from "../connect/events.js";
 
-import { avatars, avatarName, room, RandomHexColor, socketHost, UpdatePlayerAvatars, ReturnRoomUsersString, token } from "../connect/connect.js"; //should be here...
+import { avatars, avatarName, localRoomUser,  room, RandomHexColor, socketHost, UpdatePlayerAvatars, ReturnRoomUsersString, token } from "../connect/connect.js"; //should be here...
 
 export let socket = null; //the socket.io instance below
 
@@ -146,32 +146,32 @@ if (settings && !socket) {
   
             var keys = Object.keys(roomUsers);
             let userCount = keys.length;
-      //       let simpleUsers = [];
-      //       for(var i=0; i<keys.length; i++){
-      //          var key = keys[i];
-      //          var isMe = "";
-      //          // console.log(key, roomUsers[key]);
-      //          if (key === socket.id) {
-      //             isMe = "*";
-      //             localRoomUser = roomUsers[key];
-      //             // console.log("key isMe " + key);
-      //          }
-      //          const value = roomUsers[key];
+            let simpleUsers = [];
+            for(var i=0; i<keys.length; i++){
+               var key = keys[i];
+               var isMe = "";
+               // console.log(key, roomUsers[key]);
+               if (key === socket.id) {
+                  isMe = "*";
+                //   localRoomUser = roomUsers[key];
+                  // console.log("key isMe " + key);
+               }
+               const value = roomUsers[key];
                
-      //          if (value.includes("~")) {
-      //             let split = value.split("~"); //color is appended to username
-      //             split[0] = split[0].replace("_", " ");
-      //             roomUsersString += isMe + "<a href=\x22#\x22 class=\x22tooltip\x22 style=\x22color:"+split[1]+"\x22>"+ split[0]+"<span class=\x22tooltiptext\x22>"+split[0]+"</span></a>, ";
-      //             let u = {};
-      //             u.name = split[0];
-      //             u.color = split[1];
+               if (value.includes("~")) {
+                  let split = value.split("~"); //color is appended to username
+                  split[0] = split[0].replace("_", " ");
+                //   roomUsersString += isMe + "<a href=\x22#\x22 class=\x22tooltip\x22 style=\x22color:"+split[1]+"\x22>"+ split[0]+"<span class=\x22tooltiptext\x22>"+split[0]+"</span></a>, ";
+                  let u = {};
+                  u.name = split[0];
+                  u.color = split[1];
 
-      //             simpleUsers.push(u);
-      //          } else {
-      //             roomUsersString += value + ", ";
-      //          } 
-      //          usercount++;
-      //       }
+                  simpleUsers.push(u);
+               } else {
+                //   roomUsersString += value + ", ";
+               } 
+            //    usercount++;
+            }
 
       //       roomUsersString = roomUsersString.substring(0, roomUsersString.length - 2); //trim last comma and trailing space
       //       roomUsersString = usercount + " users connected: " + roomUsersString;
@@ -181,14 +181,14 @@ if (settings && !socket) {
       $('#users').html(roomUsersString);
       stringRoomUsers = roomUsersString;
       UpdatePlayerAvatars(roomUsers, roomUsersString);
-      if (userCount > 0) {
-         const playerHudEl = document.getElementById("player_hud");
-         if (playerHudEl) {
-            if (playerHudEl.components.player_hud) {
-            playerHudEl.components.player_hud.ShowConnectedUsersAndHide(userCount, simpleUsers);
-            }
-         }
-      }
+    //   if (userCount > 0) {
+    //      const playerHudEl = document.getElementById("player_hud");
+    //      if (playerHudEl) {
+    //         if (playerHudEl.components.player_hud) {
+    //         playerHudEl.components.player_hud.ShowConnectedUsersAndHide(userCount, simpleUsers);
+    //         }
+    //      }
+    //   }
       // $('#users_2').html(roomUsersString);
       // EmitSelfPosition();
    });

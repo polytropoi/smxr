@@ -3,7 +3,7 @@ import { settings  } from "../../connect/settings.js";
 import { TransformControls } from 'three/addons/controls/TransformControls.js';
 import { MeshSurfaceSampler } from 'three/addons/math/MeshSurfaceSampler.js';
 import { mouse } from "./content-utils.js";
-import { localData, GoToNext, GoToPrevious, GetMatrixData, sceneLocations } from "../../connect/connect.js";
+import { localData, GoToNext, GoToPrevious, sceneLocations } from "../../connect/connect.js";
 import { timedEventsListenerMode } from "../../connect/events.js";
 import { SaveLocalData } from "../../connect/indexedDb.js";
 
@@ -2989,7 +2989,7 @@ AFRAME.registerComponent("rotate-with-camera", { //unused
       if (this.roomData) {
         roomName = this.roomData[instanceID].name;
       } else {
-        this.loadRoomData(GetMatrixData());
+        // this.loadRoomData(GetMatrixData());
       }
       // this.matrixCalloutText.setAttribute("value", roomName);
       this.matrixCalloutText.setAttribute('troika-text', {

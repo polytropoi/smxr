@@ -576,39 +576,7 @@ maplibre_router.get('/:_id', function (req, res) {
                         aframeScript = "<script src=\x22https://cdn.jsdelivr.net/gh/aframevr/aframe@edca48b2e71a0838690c7541fab5ede279def7a1/dist/aframe-master.min.js\x22></script>"; //ref 20231103 (integrated hands!)
                         threejsVersion = "175";
                     }
-                    // if (sceneData.sceneTags[i].toLowerCase().includes("webgpu")) { 
-                    //                             // aframeScript = "";
-                    //    importMap = "<script type=\x22importmap\x22> {\x22imports\x22: {" + 
-
-
-                       
-                    //         "\x22aframe\x22: \x22https://aframe.io/releases/1.7.1/aframe.module.min.js\x22,"+  //ok, then
-                       
-                    //     // "\x22three\x22: \x22https://cdnjs.cloudflare.com/ajax/libs/three.js/0.173.0/three.module.js\x22,"+
-                    //     // "\x22three/addons/\x22: \x22https://cdn.jsdelivr.net/npm/super-three@0.173.0/examples/jsm/\x22,"+
-                            
-                    //         // "\x22aframe\x22: \x22https://cdn.jsdelivr.net/npm/aframe@1.7.1/dist/aframe-master.module.min.js\x22,"+
-                    //         "\x22three\x22: \x22https://cdn.jsdelivr.net/npm/super-three@0.176.0/build/three.webgpu.js\x22,"+
-                    //         "\x22three/webgpu\x22: \x22https://cdn.jsdelivr.net/npm/super-three@0.176.0/build/three.webgpu.js\x22,"+
-                    //         "\x22three/tsl\x22: \x22https://cdn.jsdelivr.net/npm/super-three@0.176.0/build/three.tsl.js\x22,"+
-                    //         "\x22three/addons/\x22: \x22https://cdn.jsdelivr.net/npm/super-three@0.176.0/examples/jsm/\x22,"+
-                    //         "\x22blink\x22: \x22../main/vendor/aframe/aframe-blink-controls.min.js\x22,"+ 
-                    //         "\x22aframe-sprite-particles-component\x22: \x22../main/vendor/aframe/aframe-sprite-particles-component.js\x22,"+  
-                    //         "\x22content-utils\x22: \x22../main/src/component/content-utils.js\x22,"+  
-                            
-                    //         "\x22ar_hit_caster\x22: \x22../main/src/component/ar_hit_caster.js\x22"+                  
-                        
-                    //         "}"+
-                    //     "}</script>"+
-                    //     "<script type=\x22module\x22>import AFRAME from 'aframe';"+
-                    //                                 "import { color, cos, float, mix, range, sin, time, uniform, uv, vec3, vec4, PI2 } from 'three/tsl';"+
-                    //     "</script>";
-                    //     troikaScript = "";
-                    //     particleScript = "";
-                    //     // aframeScript = "";
-                    //     // contentUtils = "<script type=\x22module\x22 ssrc=\x22../main/src/component/content_utils_esm.js\x22></script>"; 
-                        
-                    // }
+                   
                     
                 }
             }

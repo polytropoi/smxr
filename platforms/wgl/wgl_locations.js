@@ -18,7 +18,7 @@ import { CreateLight } from './wgl_lights.js';
 import { getTriggerBody, staticBodies, getModelKinematicBody, kinematicBodies, npcKinematicBodies, createDefaultCollider } from './wgl_physics.js';
 import { agentModels, CreateNPCAgent, randomNavmeshPoint } from './wgl_nav.js';
 import { UpdateModdedLocations, mods } from '../../connect/settings.js';
-import { eventEl } from '../../connect/events.js';
+// import { eventEl } from '../../connect/events.js';
 
 import { splatObjex } from './wgl_splats.js';
 import { InitVideo, GetAvailableScenesData } from './wgl_media.js';
@@ -50,6 +50,8 @@ export let navmeshGeometry;
 export let playerPosition;
 
 export let kinematicAgentMeshes = []; //children of navagents, for physics collisions
+
+const eventEl = document.getElementById("eventEl");
 
 export async function LoadModel(url) {
     const loader = new GLTFLoader();

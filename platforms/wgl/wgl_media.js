@@ -5,7 +5,7 @@ import {player, camera } from './wgl_controls.js';
 import { scene } from './wgl_main.mjs';
 import { settings } from '../../../connect/settings.js';
 import { videoEl } from '../../../connect/connect.js';
-import { eventEl } from '../../../connect/events.js';
+// import { eventEl } from '../../../connect/events.js';
 import { fancyTimeFormat, primaryAudioMangler, ReturnAudioGroupsData, createYouTubePlayer} from "../../../connect/media.js";
 import { lookAtCameraObjects } from './wgl_ui.js';
 import { UpdateEnvMap } from './wgl_environment.js';
@@ -30,6 +30,8 @@ export let sceneVideoPlayer;
 export let mediaPlayersToUpdate = [];
 
 createYouTubePlayer();
+
+const eventEl = document.getElementById("eventEl");
 
 eventEl.addEventListener('sequence-event', SequenceEvent);
 
