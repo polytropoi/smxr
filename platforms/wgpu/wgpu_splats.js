@@ -1,7 +1,8 @@
 import * as THREE from 'three/webgpu';
 import { SPZLoader } from 'three/addons/loaders/SPZLoader.js';
-import { GaussianSplat } from 'three/addons/objects/GaussianSplat.js';
+import { GaussianSplat } from 'three/addons/objects/GaussianSplat.js'; //native three splatfu
 
+import { GpuArrays, SplatCollection, SplatRenderer, createRenderer, loadSplats } from "@sparkjsdev/radix";
 
   // import { SplatMesh, SparkRenderer } from "sparkjsdev/spark";
 import {scene, renderer, StartButton, loadingHeader, splatObjex} from "./wgpu_main.mjs";
@@ -16,6 +17,10 @@ export let splatsLoaded = false;
 // export let splatObjex = [];
 
 export async function InitSplats () {
+
+    if (settings && settings.sceneTags.includes("radix")) {
+        InitRadixSplats();
+    } else {
     for (let i = 0; i < splatObjex.length; i++) {
                 
         const splatGeometry = await new SPZLoader().loadAsync( splatObjex[i].url );
@@ -55,19 +60,45 @@ export async function InitSplats () {
                 // activeObjex.push(splat);
         // scene.add( splat );
 
-
-    }
-     StartPopup(loadingHeader, 'Ready!', true);	
-        const startButton = startPop.querySelector("#startButton");
-        if (startButton) {
-        console.log("startButton found!");
-        // const startButton = document.getElementById('popup_yesButton');
-        startButton.addEventListener('pointerdown', StartButton);
-            setTimeout(() => {
-                                console.log("Hello! 3 seconds have passed.");
-                                        startPop.style.display = "none";
-                            }, 3000); 
-        } else {
-        console.log("startButton not found!");
         }
+    }
+    StartPopup(loadingHeader, 'Ready!', true);	
 }
+
+async function InitRadixSplats () {
+    console.log("tryna InitRadixSplats length of splatObjex " + splatObjex.length);
+
+ for (let i = 0; i < splatObjex.length; i++) {
+                    
+            // const splatGeometry = await new SPZLoader().loadAsync( splatObjex[i].url );
+    const data = await loadSplats(splatObjex[i].url);
+    const splatObject = new THREE.Object3D();
+      splatObject.rotation.x = Math.PI;
+    //   splatObject.position.set(0, 0, -3);
+    scene.add(splatObject);
+
+    const collection = new SplatCollection([
+        SplatCollection.arrays(GpuArrays.fromData(renderer, data), { matrixWorld: splatObject.matrixWorld }),
+    ]);
+
+    scene.add(new SplatRenderer({ renderer, collection }));
+    
+    }
+    StartPopup(loadingHeader, 'Ready!', true);	
+}
+
+
+const startButton = startPop.querySelector("#startButton");
+
+if (startButton) {
+    console.log("startButton found!");
+    // const startButton = document.getElementById('popup_yesButton');
+    startButton.addEventListener('pointerdown', StartButton);
+        // setTimeout(() => {
+        //     console.log("Hello! 3 seconds have passed.");
+        //             startPop.style.display = "none";
+        // }, 3000); 
+    } else {
+    console.log("startButton not found!");
+}
+

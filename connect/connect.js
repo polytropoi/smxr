@@ -1578,6 +1578,8 @@ export function CreateLocationAlt (filename, type, position, timestamp) { //for 
          mediaID = filename;
       }
    }
+
+
    // if (type) {
    //    markertype = type;
    // }
@@ -1585,10 +1587,15 @@ export function CreateLocationAlt (filename, type, position, timestamp) { //for 
    console.log("tryna create new location type " + markertype);
    let newPosition = {}; 
    if (!position) { //if added from dialog instead of with picker
-      // let viewportHolder = document.getElementById('viewportPlaceholder');
-      newPosition.x = selectedPosition.x;
-      newPosition.y = 0;
-      newPosition.z = selectedPosition.y; 
+     
+      if (!selectedPosition) {
+         //nm
+         // viewportnewPosition
+      } else {
+         newPosition.x = selectedPosition.x;
+         newPosition.y = 0;
+         newPosition.z = selectedPosition.y; 
+      }
       // viewportHolder.object3D.getWorldPosition( newPosition );
    } else {
       newPosition = position;

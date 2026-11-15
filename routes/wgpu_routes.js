@@ -376,37 +376,56 @@ wgpu_router.get('/:_id', function (req, res) {
 
     let xrmode =  "xr-mode-ui=\x22XRMode: xr\x22";
 
-    let  importMap = "<script type=\x22importmap\x22> {\x22imports\x22: {" + 
+    // let tonal = "";
+
+    // let mediapipe = "";
+    
+    // let radix = "";
+
+    // if (sceneResponse.sceneTags.includes("radix")) {
+    //     radix = "@sparkjsdev/radix\x22: \x22https://cdn.jsdelivr.net/npm/@sparkjsdev/radix@0.0.1/dist/radix.module.js\x22,";
+    // }
+    // if (sceneResponse.sceneTags.includes("synth")) { 
+    //     tonal =  "\x22tonal\x22: \x22https://esm.sh/tonal\x22,";
+    // }
+    // if (sceneResponse.sceneTags.includes("mediapipe")) { 
+    //     mediapipe =  "\x22mediapipe\x22: \x22https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0\x22,";
+
+    // }
+
+    // let  importMap = "<script type=\x22importmap\x22> {\x22imports\x22: {" + 
          
-                    "\x22three\x22: \x22../node_modules/three/build/three.webgpu.js\x22,"+     
-                    "\x22three/webgpu\x22: \x22../node_modules/three/build/three.webgpu.js\x22,"+   
+    //                 "\x22three\x22: \x22../node_modules/three/build/three.webgpu.js\x22,"+     
+    //                 "\x22three/webgpu\x22: \x22../node_modules/three/build/three.webgpu.js\x22,"+   
                 
-                    "\x22three/tsl\x22: \x22../node_modules/three/build/three.tsl.js\x22,"+
-                    "\x22three/addons/\x22: \x22../node_modules/three/examples/jsm/\x22,"+
+    //                 "\x22three/tsl\x22: \x22../node_modules/three/build/three.tsl.js\x22,"+
+    //                 "\x22three/addons/\x22: \x22../node_modules/three/examples/jsm/\x22,"+
                 
 
-                    "\x22three-pathfinding\x22: \x22/platforms/wgpu/src/three-pathfinding.module.js\x22,"+
-                    "\x22tsl-textures\x22: \x22/platforms/wgpu/tsl/tsl-textures.js\x22,"+
-                        "\x22three-text/three\x22: \x22../node_modules/three-text/dist/three/index.js\x22,"+
-                        "\x22mediapipe\x22: \x22https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0\x22,"+ // todo alt importmap if "hands", etc..
+    //                 "\x22three-pathfinding\x22: \x22/platforms/wgpu/src/three-pathfinding.module.js\x22,"+
+    //                 "\x22tsl-textures\x22: \x22/platforms/wgpu/tsl/tsl-textures.js\x22,"+
+    //                     "\x22three-text/three\x22: \x22../node_modules/three-text/dist/three/index.js\x22,"+
+    //                     // "\x22mediapipe\x22: \x22https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0\x22,"+ // todo alt importmap if "hands", etc..
 
-                    // "\x22@tonaljs/tonal\x22: \x22../node_modules/tonal/dist/index.js\x22,"+
+    //                 // "\x22@tonaljs/tonal\x22: \x22../node_modules/tonal/dist/index.js\x22,"+
 
-                    "\x22tonal\x22: \x22https://esm.sh/tonal\x22,"+
-
-                    // "tonal": "https://esm.sh"
+                   
+    //                 tonal +
+    //                 radix +
+    //                 mediapipe +
+    //                 // "tonal": "https://esm.sh"
                     
                     
-                    "\x22rapier\x22: \x22https://cdn.skypack.dev/@dimforge/rapier3d-compat\x22"+
+    //                 "\x22rapier\x22: \x22https://cdn.skypack.dev/@dimforge/rapier3d-compat\x22"+
 
-                    // "\x22three-html-render\x22: \x22../node_modules/three-html-render/\x22,"+
-                    // "\x22three-html-render/polyfill\x22: \x22../node_modules/three-html-render/polyfill.js\x22"+
-                        // "\x22three-html-render/polyfill\x22: \x22https://cdn.jsdelivr.net/npm/three-html-render/dist/polyfill.mjs\x22," +
-                        // "\x22three-html-render/html-texture\x22: \x22https://cdn.jsdelivr.net/npm/three-html-render/dist/html-texture.js\x22,"+
-                        // "\x22three-html-render/interaction-manager\x22: \x22https://cdn.jsdelivr.net/npm/three-html-render/dist/interaction-manager.js\x22"+
+    //                 // "\x22three-html-render\x22: \x22../node_modules/three-html-render/\x22,"+
+    //                 // "\x22three-html-render/polyfill\x22: \x22../node_modules/three-html-render/polyfill.js\x22"+
+    //                     // "\x22three-html-render/polyfill\x22: \x22https://cdn.jsdelivr.net/npm/three-html-render/dist/polyfill.mjs\x22," +
+    //                     // "\x22three-html-render/html-texture\x22: \x22https://cdn.jsdelivr.net/npm/three-html-render/dist/html-texture.js\x22,"+
+    //                     // "\x22three-html-render/interaction-manager\x22: \x22https://cdn.jsdelivr.net/npm/three-html-render/dist/interaction-manager.js\x22"+
                     
-                    "}"+
-                "}</script>";
+    //                 "}"+
+    //             "}</script>";
     
                    
     
@@ -477,6 +496,59 @@ wgpu_router.get('/:_id', function (req, res) {
             sceneWeather = sceneData.sceneWeather;
             sceneClouds = sceneData.sceneClouds;
 
+
+            let tonal = "";
+
+            let mediapipe = "";
+            
+            let radix = "";
+
+            if (sceneData.sceneTags.includes("radix")) {
+                radix = "@sparkjsdev/radix\x22: \x22https://cdn.jsdelivr.net/npm/@sparkjsdev/radix@0.0.1/dist/radix.module.js\x22,";
+            }
+            if (sceneData.sceneTags.includes("synth")) { 
+                tonal = "\x22tonal\x22: \x22https://esm.sh/tonal\x22,";
+            }
+            if (sceneData.sceneTags.includes("mediapipe")) { 
+                mediapipe =  "\x22mediapipe\x22: \x22https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0\x22,";
+
+            }
+
+            let  importMap = "<script type=\x22importmap\x22> {\x22imports\x22: {" + 
+         
+                    "\x22three\x22: \x22../node_modules/three/build/three.webgpu.js\x22,"+     
+                    "\x22three/webgpu\x22: \x22../node_modules/three/build/three.webgpu.js\x22,"+   
+                
+                    "\x22three/tsl\x22: \x22../node_modules/three/build/three.tsl.js\x22,"+
+                    "\x22three/addons/\x22: \x22../node_modules/three/examples/jsm/\x22,"+
+                
+
+                    "\x22three-pathfinding\x22: \x22/platforms/wgpu/src/three-pathfinding.module.js\x22,"+
+                    "\x22tsl-textures\x22: \x22/platforms/wgpu/tsl/tsl-textures.js\x22,"+
+                        "\x22three-text/three\x22: \x22../node_modules/three-text/dist/three/index.js\x22,"+
+                        "\x22mediapipe\x22: \x22https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0\x22,"+ // todo alt importmap if "hands", etc..
+
+                    // "\x22@tonaljs/tonal\x22: \x22../node_modules/tonal/dist/index.js\x22,"+
+                    "\x22tonal\x22: \x22https://esm.sh/tonal\x22,"+
+                   
+                    // tonal +
+                    // radix +
+                    // mediapipe +
+                    // "tonal": "https://esm.sh"
+                     "\x22@sparkjsdev/radix\x22: \x22https://cdn.jsdelivr.net/npm/@sparkjsdev/radix@0.0.1/dist/radix.module.js\x22,"+
+                    
+                    "\x22rapier\x22: \x22https://cdn.skypack.dev/@dimforge/rapier3d-compat\x22"+
+
+                    // "\x22three-html-render\x22: \x22../node_modules/three-html-render/\x22,"+
+                    // "\x22three-html-render/polyfill\x22: \x22../node_modules/three-html-render/polyfill.js\x22"+
+                        // "\x22three-html-render/polyfill\x22: \x22https://cdn.jsdelivr.net/npm/three-html-render/dist/polyfill.mjs\x22," +
+                        // "\x22three-html-render/html-texture\x22: \x22https://cdn.jsdelivr.net/npm/three-html-render/dist/html-texture.js\x22,"+
+                        // "\x22three-html-render/interaction-manager\x22: \x22https://cdn.jsdelivr.net/npm/three-html-render/dist/interaction-manager.js\x22"+
+                    
+                    "}"+
+                "}</script>";
+    
+                   
             if (sceneData.sceneTags != null) {        
                 for (let i = 0; i < sceneData.sceneTags.length; i++) { //not ideal, but it's temporary... //no it isn't
                     if (sceneData.sceneTags[i].toLowerCase().includes("spark") || sceneData.sceneTags[i].toLowerCase().includes("splat")) {    

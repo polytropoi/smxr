@@ -404,9 +404,13 @@ window.addEventListener( 'keydown',  ( event ) => {
   $('#modalContent').on('click', '#createLocationButton', function(e) {
     if (settings && settings.sceneType.toLowerCase() == "aframe" || settings && settings.sceneType.toLowerCase() == "default") {
       CreateLocationAframe(); //aframe
-    } else {
+    } else if (settings && settings.sceneType.toLowerCase() == "pixi") {
       CreateLocationAlt(); //not aframe
-    }
+      
+    } else {
+      // CreateLocationThree() 
+      SendLocationEvent("new", null, null, null); //um, if allow mods?
+    } 
   });
 
   $('#modalContent').on('click', '#dequipButton', function(e) {
