@@ -94,23 +94,47 @@ export async function initSplats (options) {
         } else {
           
         }
-        const xrot = splatObjex[i].locationData.eulerx ? splatObjex[i].locationData.eulerx : 0;
-        const yrot = splatObjex[i].locationData.eulery ? splatObjex[i].locationData.eulery : 0;
-        const zrot = splatObjex[i].locationData.eulerz ? splatObjex[i].locationData.eulerz : 0;
 
-        const xscale = splatObjex[i].locationData.xscale ? splatObjex[i].locationData.xscale : 1;
-
-        const yscale = splatObjex[i].locationData.yscale ? splatObjex[i].locationData.yscale : 1;  
-        const zscale = splatObjex[i].locationData.zscale ? splatObjex[i].locationData.zscale : 1;
-      
-        splat.position.set(splatObjex[i].locationData.x, splatObjex[i].locationData.y, splatObjex[i].locationData.z);
-      
-        splat.rotation.set(xrot, yrot, zrot, 'XYZ');
+              // }
+          const xrot = splatObjex[i].locationData.eulerx ? splatObjex[i].locationData.eulerx : 0;
+          const yrot = splatObjex[i].locationData.eulery ? splatObjex[i].locationData.eulery : 0;
+          const zrot = splatObjex[i].locationData.eulerz ? splatObjex[i].locationData.eulerz : 0;
+          const xscale = splatObjex[i].locationData.xscale ? splatObjex[i].locationData.xscale : 1;
+          const yscale = splatObjex[i].locationData.yscale ? splatObjex[i].locationData.yscale : 1;  
+          const zscale = splatObjex[i].locationData.zscale ? splatObjex[i].locationData.zscale : 1;
         
-        splat.scale.set(xscale, yscale * modFlip, zscale);
-        scene.add(splat);
-        splat.userData.name = "SPLAT";
-        activeObjex.push(splat);
+          splat.position.set(splatObjex[i].locationData.x, splatObjex[i].locationData.y, splatObjex[i].locationData.z);
+        
+          // splat.rotation.set(xrot, yrot, Math.PI, 'XYZ');
+          splat.rotation.set(xrot, yrot, zrot, 'XYZ');
+
+          if (splatObjex[i].locationData.locationTags.includes("flip")) {
+                splat.rotation.x = Math.PI;
+          }
+          // splat.rotation.x = Math.PI;
+          
+          // splat.scale.set(xscale, yscale * modFlip, zscale);
+          splat.scale.set(xscale, yscale, zscale);
+          scene.add(splat);
+          splat.userData.name = "SPLAT";
+          
+        // const xrot = splatObjex[i].locationData.eulerx ? splatObjex[i].locationData.eulerx : 0;
+        // const yrot = splatObjex[i].locationData.eulery ? splatObjex[i].locationData.eulery : 0;
+        // const zrot = splatObjex[i].locationData.eulerz ? splatObjex[i].locationData.eulerz : 0;
+
+        // const xscale = splatObjex[i].locationData.xscale ? splatObjex[i].locationData.xscale : 1;
+
+        // const yscale = splatObjex[i].locationData.yscale ? splatObjex[i].locationData.yscale : 1;  
+        // const zscale = splatObjex[i].locationData.zscale ? splatObjex[i].locationData.zscale : 1;
+      
+        // splat.position.set(splatObjex[i].locationData.x, splatObjex[i].locationData.y, splatObjex[i].locationData.z);
+      
+        // splat.rotation.set(xrot, yrot, zrot, 'XYZ');
+        
+        // splat.scale.set(xscale, yscale * modFlip, zscale);
+        // scene.add(splat);
+        // splat.userData.name = "SPLAT";
+        // activeObjex.push(splat);
         // await new Promise(r => setTimeout(r, 100));
 
 

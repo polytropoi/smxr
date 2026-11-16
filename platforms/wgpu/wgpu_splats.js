@@ -38,15 +38,14 @@ export async function InitSplats () {
                 const xrot = splatObjex[i].locationData.eulerx ? splatObjex[i].locationData.eulerx : 0;
                 const yrot = splatObjex[i].locationData.eulery ? splatObjex[i].locationData.eulery : 0;
                 const zrot = splatObjex[i].locationData.eulerz ? splatObjex[i].locationData.eulerz : 0;
-        
                 const xscale = splatObjex[i].locationData.xscale ? splatObjex[i].locationData.xscale : 1;
-        
                 const yscale = splatObjex[i].locationData.yscale ? splatObjex[i].locationData.yscale : 1;  
                 const zscale = splatObjex[i].locationData.zscale ? splatObjex[i].locationData.zscale : 1;
               
                 splat.position.set(splatObjex[i].locationData.x, splatObjex[i].locationData.y, splatObjex[i].locationData.z);
               
-                splat.rotation.set(xrot, yrot, Math.PI, 'XYZ');
+                // splat.rotation.set(xrot, yrot, Math.PI, 'XYZ');
+                splat.rotation.set(xrot, yrot, zrot, 'XYZ');
 
                 if (splatObjex[i].locationData.locationTags.includes("flip")) {
                      splat.rotation.x = Math.PI;
@@ -61,21 +60,38 @@ export async function InitSplats () {
         // scene.add( splat );
 
         }
-    }
     StartPopup(loadingHeader, 'Ready!', true);	
+    }
+
 }
 
 async function InitRadixSplats () {
     console.log("tryna InitRadixSplats length of splatObjex " + splatObjex.length);
 
- for (let i = 0; i < splatObjex.length; i++) {
+    for (let i = 0; i < splatObjex.length; i++) {
+                    const xrot = splatObjex[i].locationData.eulerx ? splatObjex[i].locationData.eulerx : 0;
+                const yrot = splatObjex[i].locationData.eulery ? splatObjex[i].locationData.eulery : 0;
+                const zrot = splatObjex[i].locationData.eulerz ? splatObjex[i].locationData.eulerz : 0;
+                const xscale = splatObjex[i].locationData.xscale ? splatObjex[i].locationData.xscale : 1;
+                const yscale = splatObjex[i].locationData.yscale ? splatObjex[i].locationData.yscale : 1;  
+                const zscale = splatObjex[i].locationData.zscale ? splatObjex[i].locationData.zscale : 1;
                     
             // const splatGeometry = await new SPZLoader().loadAsync( splatObjex[i].url );
+        StartPopup(loadingHeader, 'Loading Splats...', false);	        
     const data = await loadSplats(splatObjex[i].url);
     const splatObject = new THREE.Object3D();
-      splatObject.rotation.x = Math.PI;
-    //   splatObject.position.set(0, 0, -3);
+    splatObject.rotation.set(xrot, yrot, zrot, 'XYZ');
+
+    if (splatObjex[i].locationData.locationTags.includes("flip")) {
+        splatObject.rotation.x = Math.PI;
+    }
+    
+    // splatObject.rotation.x = Math.PI;
+    // }
+    splatObject.position.set(splatObjex[i].locationData.x, splatObjex[i].locationData.y, splatObjex[i].locationData.z);
+    splatObject.scale.set(xscale, yscale, zscale);
     scene.add(splatObject);
+    splatObject.updateMatrixWorld();
 
     const collection = new SplatCollection([
         SplatCollection.arrays(GpuArrays.fromData(renderer, data), { matrixWorld: splatObject.matrixWorld }),
@@ -84,6 +100,7 @@ async function InitRadixSplats () {
     scene.add(new SplatRenderer({ renderer, collection }));
     
     }
+
     StartPopup(loadingHeader, 'Ready!', true);	
 }
 

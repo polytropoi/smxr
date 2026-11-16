@@ -169,7 +169,12 @@ export function createDefaultNavmesh(locData) {
        
            
            scene.add(navmesh);
-           navmesh.visible = false;
+           if (settings && settings.sceneTags.includes("debug")) {
+                console.log("navmesh visible for debug!");
+           } else {
+                navmesh.visible = false;
+           }
+           
            // navmesh.position.set(0,0,0);
            // // navmeshObject.scale.set(1,1,1);
            // navmesh.rotation.x = Math.PI / 2;
@@ -863,7 +868,20 @@ async function LoadLocationModel (url, locationData, isActive) {
 
             model.scale.set(xscale,yscale,zscale);
 
-            model.name = locationData.timestamp;
+            if (locationData.locationTags && locationData.locationTags.includes("hide")) {
+                model.visible = false;
+            }
+            
+            if (locationData.timestamp != undefined) {
+                model.name = locationData.timestamp;
+                model.userData.timestamp = locationData.timestamp;
+            } else {
+                model.name = "model_" + Date.now();
+                model.userData.name = "model_" + Date.now();
+                model.userData.timestamp = Date.now();
+            }
+        // model.layers.set(1);
+            model.userData.locationData = locationData;
             if (locationData.eventData.includes("instance")) {
                 let instancedModel = {};
 
@@ -949,17 +967,25 @@ async function LoadLocationModel (url, locationData, isActive) {
 
             // model.scale.set(20,20,20);
 
-        model.name = locationData.timestamp;
+            if (locationData.timestamp != undefined) {
+                model.name = locationData.timestamp;
+                model.userData.timestamp = locationData.timestamp;
+            } else {
+                model.name = "model_" + Date.now();
+                model.userData.name = "model_" + Date.now();
+                model.userData.timestamp = Date.now();
+            }
         // model.layers.set(1);
         model.userData.locationData = locationData;
 
-        model.userData.timestamp = locationData.timestamp;
+
         
         model.castShadow = true;
         model.receiveShadow = true;
         // if (locationData.locationTags.includes("active")) {
             // activeObjex.push(model);
         // } 
+        
         model.updateMatrixWorld(true);
         
         if (locationData.locationTags && locationData.locationTags.includes("billboard")) {
@@ -1035,6 +1061,7 @@ async function LoadLocationModel (url, locationData, isActive) {
                 } else if (name.includes("hvid")) {
                     child.material = PsychNoiseMaterial();
                 }
+
 
             }
 
@@ -1128,6 +1155,12 @@ async function LoadLocationModel (url, locationData, isActive) {
 
                         }
                     }
+
+                if (locationData.markerType == "placeholder" || locationData.markerType == "poi") {
+                    const placeholderMat = new THREE.MeshBasicMaterial({color:"yellow", roughness:.2, metalness: .25});
+                    child.material = placeholderMat;
+                    // child.material.opacity = 1;
+                }
                 
             } else if (child.isBone && !child.parent.isBone) { //add raycast/collision meshes to root bone(s)
                 // const geometry = new THREE.CapsuleGeometry(1, 1, 8, 8); // Base size
@@ -1193,9 +1226,11 @@ async function CreateDefaultLocationMarker(locationData) { //use default model o
             model = await LoadLocationModel(null, locationData, true);
         } else {
             model = await LoadLocationModel('https://servicemedia.s3.amazonaws.com/assets/models/poi1b.glb', locationData, true);
+           
         }
         if (model) {
             scene.add(model.model);
+            //  model.model.material.transparent = false;
             // model.material.color = "orange";
             console.log("adding poi! " + model);
         }
@@ -1207,12 +1242,15 @@ async function CreateDefaultLocationMarker(locationData) { //use default model o
             model = await LoadLocationModel(null, locationData, true);
         } else {
             model = await LoadLocationModel('https://servicemedia.s3.amazonaws.com/assets/models/poi1b.glb', locationData, true);
+
         }
         if (model) {
+            //  model.model.material.transparent = false;
             scene.add(model.model);
             // model.material.color = "orange";
             console.log("adding placeholder! " + model);
         }
+
         break;
 
         case "trigger":

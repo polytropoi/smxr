@@ -756,7 +756,7 @@ export function UpdateControls() {
 
             const onObject = intersections.length > 0;
             if (onObject) {
-                // console.log(JSON.stringify(controls.object.position) + " pos " + groundObjex.length + " groundObjex with intersections " + intersections.length + " distance to 0th " + intersections[0].distance + " point.y " + intersections[0].point.y + " camera y " + controls.object.position.y);
+                // console.log(JSON.stringify(intersections[0].position) + " pos " + groundObjex.length + " groundObjex with intersections " + intersections.length + " distance to 0th " + intersections[0].distance + " point.y " + intersections[0].point.y);
             }
 
             const delta = (time - prevTime) / 1000;
@@ -912,7 +912,7 @@ async function RaycastHit(type, hit, event) {
 
     let tagData;
 
-    if (lastHitObjectName.includes("avatar_")) {
+    if (lastHitObjectName && lastHitObjectName.toString().includes("avatar_")) {
         tagData = avatars[lastHitObjectName];
         console.log("avatar tags " + JSON.stringify(tagData));
         if (tagData) {
@@ -1458,7 +1458,7 @@ export function onMouseDown(event) { // on threejs object
         return;
     }
     
-    if (lastHitObjectName && lastHitObjectName.includes("avatar_")) {
+    if (lastHitObjectName && lastHitObjectName.toString().includes("avatar_")) {
         const tagData = avatars[lastHitObjectName];
         console.log("avatar tags " + JSON.stringify(tagData));
         if (tagData) {
@@ -1638,7 +1638,7 @@ export function onMouseDown(event) { // on threejs object
             } else if (lastRaycastHitObject.userData.objectData) {
 
                 
-                if (lastRaycastHitObject.userData.locationData.mediaID) {
+                if (sceneTextController && lastRaycastHitObject.userData.locationData.mediaID) {
                     textData = sceneTextController.returnTextData(lastRaycastHitObject.userData.locationData.mediaID);
                     console.log("text item " + JSON.stringify(textData));
                 }
