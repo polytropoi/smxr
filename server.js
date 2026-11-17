@@ -1970,7 +1970,7 @@ app.post('/drop/', requiredAuthentication, function (req, res) { //remove from p
 
 app.post('/pickup/', requiredAuthentication, function (req, res) { 
     let timestamp = Math.round(Date.now() / 1000);
-    console.log("pickup called userid " + req.session.user._id + " from scene inventory " + req.body.fromSceneInventory);
+    // console.log("req.body.object_item " + JSON.stringify(req.body.object_item) +  " pickup w/ userid " + req.session.user._id + " from scene inventory " + req.body.fromSceneInventory);
     let inventoryItem = {};
     let actionItem = {};
     // let sceneInventoryID = null;        
@@ -2004,8 +2004,9 @@ app.post('/pickup/', requiredAuthentication, function (req, res) {
             inventoryItem.objectName = req.body.object_item.name;
             inventoryItem.objectType = req.body.object_item.objtype;
             inventoryItem.objectCategory = req.body.object_item.objcat;
-            inventoryItem.obectSubCategory = req.body.object_item.objsubcat;
-            inventoryItem.obectClass = req.body.object_item.objclass;
+            inventoryItem.objectSubCategory = req.body.object_item.objsubcat;
+            inventoryItem.objectClass = req.body.object_item.objclass;
+            inventoryItem.objectData = req.body.object_item;
             inventoryItem.timestamp = timestamp;
             inventoryItem.fromScene = req.body.fromScene;
 

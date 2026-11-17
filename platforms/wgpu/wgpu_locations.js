@@ -16,7 +16,7 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 // import { GLTFLoader } from '/node_modules/three/addons/loaders/GLTFLoader.js';
 // import { GLTFLoader } from 'three/addons';
 
-// import * as SkeletonUtils from 'three/addons/utils/SkeletonUtils.js';
+import * as SkeletonUtils from 'three/addons/utils/SkeletonUtils.js';
 
 import { instancedModels, createDefaultSurface, SetSurface, InstanceOnSurface } from './wgpu_instance.js';
 

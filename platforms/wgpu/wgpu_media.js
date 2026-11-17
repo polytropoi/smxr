@@ -43,7 +43,7 @@ export let pictureGroupIndexes = {};
 
 
 const eventEl = document.getElementById("eventEl");
-
+export let webcamEl;// = document.createElement("video");
 
 eventEl.addEventListener('sequence-event', SequenceEvent); 
 
@@ -1320,4 +1320,44 @@ export class ScenePicture {
         }
         return this.isVisible;
     }
+}
+// const videoEl = document.createElement("videoEl");
+
+export async function getWebcamVideo() {
+// if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+//     const webcamEl = document.createElement("video");
+//     navigator.mediaDevices
+//       .getUserMedia({ video: { facingMode: "user" } })
+//       .then(function (stream) {
+//         webcamEl.srcObject = stream;
+//         webcamEl.play();
+//         console.log("playing webcam!");
+//       })
+//       .catch(function (error) {
+//         console.error("🛑 Unable to access the camera/webcam.", error);
+//       });
+//   }
+//   return webcamEl;
+        const video = document.createElement('video');
+        video.autoplay = true;
+        video.playsInline = true;
+        video.muted = true; 
+        navigator.mediaDevices.getUserMedia({ video: true, audio: false })
+        .then((stream) => {
+            video.srcObject = stream;
+            video.play();
+        })
+        .catch((err) => {
+            console.error('Error accessing webcam:', err);
+        });
+
+        // 3. Create a Three.js VideoTexture using the video element
+        const videoTexture = new THREE.VideoTexture(video);
+        videoTexture.colorSpace = THREE.SRGBColorSpace; // Recommended for accurate colors
+
+        // 4. Create a material and geometry, then map the video texture
+        const geometry = new THREE.BoxGeometry(2, 2, 2);
+        const material = new THREE.MeshBasicMaterial({ map: videoTexture });
+        const cube = new THREE.Mesh(geometry, material);
+        scene.add(cube);
 }

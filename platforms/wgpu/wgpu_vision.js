@@ -1,6 +1,6 @@
 import { HandLandmarker, FilesetResolver } from "mediapipe";
 
-const video = document.createElement("video");
+const videoEl = document.createElement("video");
 
 export async function getVisionStuff() {
   const wasmPath = "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0/wasm";
@@ -18,29 +18,29 @@ export async function getVisionStuff() {
     navigator.mediaDevices
       .getUserMedia({ video: { facingMode: "user" } })
       .then(function (stream) {
-        video.srcObject = stream;
-        video.play();
+        videoEl.srcObject = stream;
+        videoEl.play();
       })
       .catch(function (error) {
         console.error("🛑 Unable to access the camera/webcam.", error);
       });
   }
-  return { video, handLandmarker };
+  return { video: videoEl, handLandmarker };
 }
 
-export async function getVideo() {
+export async function getMediaPipeVideo() {
 if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
     navigator.mediaDevices
       .getUserMedia({ video: { facingMode: "user" } })
       .then(function (stream) {
-        video.srcObject = stream;
-        video.play();
+        videoEl.srcObject = stream;
+        videoEl.play();
       })
       .catch(function (error) {
         console.error("🛑 Unable to access the camera/webcam.", error);
       });
   }
-  return video;
+  return videoEl;
 }
 
 export async function getHandLandmarker() {

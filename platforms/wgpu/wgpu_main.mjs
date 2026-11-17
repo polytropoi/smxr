@@ -41,9 +41,9 @@
 
 	import { InitEnvMap, InitSky, InitFog, InitGrid, InitGround, InitHeightmap } from './wgpu_environment.js';
 
-		import { equippedRigidbody, TriggerHit } from './wgpu_actions.js';
+	import { equippedRigidbody, TriggerHit } from './wgpu_actions.js';
 
-	import { getVideo, getHandLandmarker } from './wgpu_vision.js';
+	// import { getVideo, getHandLandmarker } from './wgpu_vision.js';
 
 	import { lightMods, modLights, InitSceneLights, clusteredLighting, InitClusteredLights } from './wgpu_lights.js';
 
@@ -55,7 +55,7 @@
 	
 	import { SetControls, onKeyDown, onKeyUp, onMouseDown, onMouseMove, onMouseUp, onMouseWheel, player, camera, isReady, UpdateControls, cameraWorldPosition, cameraAtZero } from './wgpu_controls.js';
 	
-	import { InitAudioGroups, InitPictureGroups, ambientAudioController, InitSceneText, mediaPlayersToUpdate, InitVideoGroups, availableScenesData, InitSceneMedia } from './wgpu_media.js';
+	import { InitAudioGroups, InitPictureGroups, ambientAudioController, InitSceneText, mediaPlayersToUpdate, InitVideoGroups, availableScenesData, InitSceneMedia, getWebcamVideo } from './wgpu_media.js';
 	
 	import { equipOnLoadEvent, LoadSceneInventory, EquipInventoryCheck } from './wgpu_inventory.js';
 
@@ -77,10 +77,20 @@
 	
 	import { InitSuperSonic, SynthHit, synthKeys, SynthKeys, superSonicLoaded, synthTransports } from './wgpu_synths.js';
 
+	// import QuadMesh from 'three/addons/objects/QuadMesh.js';
+
+	const material = new THREE.MeshBasicNodeMaterial();
+	material.colorNode = color('cyan'); // Or use TSL nodes like uv()
+
+	// 3. Instantiate QuadMesh
+	const quadMesh = new THREE.QuadMesh(material);
+
+	
+
 	const eventEl = document.getElementById("eventEl");
 	export let scene;
 
-
+	let visionModule;
 
 
 	let stats, pivot;
@@ -150,6 +160,7 @@
 		// renderer.toneMapping = THREE.LinearToneMapping;
 		// renderer.toneMappingExposure = 0.4;
 
+		
 		three_canvas.setAttribute('layoutsubtree', 'true'); //for HIC, eventually
 
 		// three_canvas.addEventListener('click', (event) => {
@@ -160,11 +171,12 @@
 		// three_canvas.addEventListener('pointerdown', (event) => {
 		// event.stopPropagation(); 
 		// });
+
 		loadingHeader = "<h2>" +settings.sceneTitle+ "</h2>";
 		StartPopup(loadingHeader, 'Loading....', false);
 		await renderer.init(); 
 		
-
+		 quadMesh.render(renderer);
 		renderer.setPixelRatio( window.devicePixelRatio );
 				// renderer.setPixelRatio( 2.0 );
 		renderer.setSize( window.innerWidth, window.innerHeight );
@@ -301,26 +313,44 @@
 		}
 
 
-		if (settings && settings.sceneTags.includes("webcam background")) {
+		if (settings && settings.sceneTags.includes("webcam")) {
 
 			// Video Mesh
 			// init video and MediaPipe
 			StartPopup(loadingHeader, 'Loading Webcam....', false);
-			video = await getVideo();
-
-			
-			
-			const texture = new THREE.VideoTexture(video);
+			if (settings && settings.sceneTags.includes("mediapipe") && !visionModule) {
+				visionModule = await import('./wgpu_vision.js');
+				video = await visionModule.getMediaPipeVideo();
+							const texture = new THREE.VideoTexture(video);
 			texture.colorSpace = THREE.SRGBColorSpace;
 			const geometry = new THREE.PlaneGeometry(1, 1);
 			const material = new THREE.MeshBasicMaterial({
-			map: texture,
-			depthWrite: false,
-			side: THREE.DoubleSide,
+				map: texture,
+				depthWrite: false,
+				side: THREE.DoubleSide,
 			});
 			videomesh = new THREE.Mesh(geometry, material);
 			videomesh.rotation.y = Math.PI;
 			scene.add(videomesh);
+			} else {
+				video = getWebcamVideo();
+			}
+
+
+			
+			
+			// const texture = new THREE.VideoTexture(video);
+			// texture.colorSpace = THREE.SRGBColorSpace;
+			// const geometry = new THREE.PlaneGeometry(1, 1);
+			// const material = new THREE.MeshBasicMaterial({
+			// 	map: texture,
+			// 	depthWrite: false,
+			// 	side: THREE.DoubleSide,
+			// });
+			// videomesh = new THREE.Mesh(geometry, material);
+			// videomesh.rotation.y = Math.PI;
+			// scene.add(videomesh);
+			
 
 				// const distance = 10; // How far the video is from the camera
 				// videomesh.position.z = -distance;
@@ -336,10 +366,16 @@
 			// resizeVideoMesh();
 			
 		}
-		if (settings.sceneTags.includes("hand")) {
-			handLandmarker = await getHandLandmarker();
+		if (settings.sceneTags.includes("hand") && settings.sceneTags.includes("mediapipe")) {
+
+		// if (settings.sceneTags.includes("hand")) {
+				// import { getVideo, getHandLandmarker } from './wgpu_vision.js';
+			visionModule = await import('./wgpu_vision.js');
+			handLandmarker = await visionModule.getHandLandmarker();
 			useHandLandmarks = true;
 			initHandColliderGroup();
+		} else {
+			// resizeVideoMesh();
 		}
 		
 		if (settings && settings.sceneTags.includes("post processing")) {

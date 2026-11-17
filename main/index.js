@@ -18409,8 +18409,8 @@ function getAllPeople() {
             
             .use(AwsS3, {
             shouldUseMultipart(file) {
-		// Use multipart only for files larger than 100MiB. //make it 300, need to fix
-                return file.size > 300 * 2 ** 20;
+		// Use multipart only for files larger than 100MiB. //make it 300, need to fix// 500!
+                return file.size > 500 * 2 ** 20;
             },
             getUploadParameters (file) {
                 console.log('tryna fetch /stagingputurl/' + cookie._id);

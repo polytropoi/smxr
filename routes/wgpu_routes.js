@@ -525,9 +525,9 @@ wgpu_router.get('/:_id', function (req, res) {
             importMapTemplate.imports["rapier"] = "https://cdn.skypack.dev/@dimforge/rapier3d-compat";
             importMapTemplate.imports["tsl-textures"] = "/platforms/wgpu/tsl/tsl-textures.js";
             importMapTemplate.imports["tonal"] = "https://esm.sh/tonal";
-            importMapTemplate.imports["tonal"] = "https://esm.sh/tonal";
-            importMapTemplate.imports["mediapipe"] = "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0";
-            // importMapTemplate.imports["sparkjsdev/radix"] = "https://cdn.jsdelivr.net/npm/@sparkjsdev/radix@0.0.1/dist/radix.module.js";
+
+            // importMapTemplate.imports["mediapipe"] = "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0";
+            importMapTemplate.imports["sparkjsdev/radix"] = "https://cdn.jsdelivr.net/npm/@sparkjsdev/radix@0.0.1/dist/radix.module.js";
 
 
             if (sceneData.sceneTags.includes("radix")) {
@@ -540,10 +540,10 @@ wgpu_router.get('/:_id', function (req, res) {
             }
             if (sceneData.sceneTags.includes("mediapipe")) { 
                 
-                // importMapTemplate.imports["mediapipe"] = "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0";
+                importMapTemplate.imports["mediapipe"] = "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0";
 
             }
-            if (sceneData.sceneTags.includes("physics")) { 
+            if (sceneData.sceneTags.includes("physics")) { //that's a lot
                 
                 // importMapTemplate.imports["rapier"] = "https://cdn.skypack.dev/@dimforge/rapier3d-compat";
 

@@ -4,6 +4,7 @@ import { GaussianSplat } from 'three/addons/objects/GaussianSplat.js'; //native 
 
 import { GpuArrays, SplatCollection, SplatRenderer, createRenderer, loadSplats } from "sparkjsdev/radix";
 
+
   // import { SplatMesh, SparkRenderer } from "sparkjsdev/spark";
 import {scene, renderer, StartButton, loadingHeader, splatObjex} from "./wgpu_main.mjs";
 
@@ -47,7 +48,7 @@ export async function InitSplats () {
                 // splat.rotation.set(xrot, yrot, Math.PI, 'XYZ');
                 splat.rotation.set(xrot, yrot, zrot, 'XYZ');
 
-                if (splatObjex[i].locationData.locationTags.includes("flip")) {
+                if (!splatObjex[i].locationData.locationTags.includes("flip")) {
                      splat.rotation.x = Math.PI;
                 }
                 // splat.rotation.x = Math.PI;
@@ -69,18 +70,18 @@ async function InitRadixSplats () {
     console.log("tryna InitRadixSplats length of splatObjex " + splatObjex.length);
 
     for (let i = 0; i < splatObjex.length; i++) {
-                    const xrot = splatObjex[i].locationData.eulerx ? splatObjex[i].locationData.eulerx : 0;
-                const yrot = splatObjex[i].locationData.eulery ? splatObjex[i].locationData.eulery : 0;
-                const zrot = splatObjex[i].locationData.eulerz ? splatObjex[i].locationData.eulerz : 0;
-                const xscale = splatObjex[i].locationData.xscale ? splatObjex[i].locationData.xscale : 1;
-                const yscale = splatObjex[i].locationData.yscale ? splatObjex[i].locationData.yscale : 1;  
-                const zscale = splatObjex[i].locationData.zscale ? splatObjex[i].locationData.zscale : 1;
-                    
-            // const splatGeometry = await new SPZLoader().loadAsync( splatObjex[i].url );
+        const xrot = splatObjex[i].locationData.eulerx ? splatObjex[i].locationData.eulerx : 0;
+        const yrot = splatObjex[i].locationData.eulery ? splatObjex[i].locationData.eulery : 0;
+        const zrot = splatObjex[i].locationData.eulerz ? splatObjex[i].locationData.eulerz : 0;
+        const xscale = splatObjex[i].locationData.xscale ? splatObjex[i].locationData.xscale : 1;
+        const yscale = splatObjex[i].locationData.yscale ? splatObjex[i].locationData.yscale : 1;  
+        const zscale = splatObjex[i].locationData.zscale ? splatObjex[i].locationData.zscale : 1;
+                        
+                // const splatGeometry = await new SPZLoader().loadAsync( splatObjex[i].url );
         StartPopup(loadingHeader, 'Loading Splats...', false);	        
-    const data = await loadSplats(splatObjex[i].url);
-    const splatObject = new THREE.Object3D();
-    splatObject.rotation.set(xrot, yrot, zrot, 'XYZ');
+        const data = await loadSplats(splatObjex[i].url);
+        const splatObject = new THREE.Object3D();
+        splatObject.rotation.set(xrot, yrot, zrot, 'XYZ');
 
     if (splatObjex[i].locationData.locationTags.includes("flip")) {
         splatObject.rotation.x = Math.PI;

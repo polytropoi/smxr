@@ -405,7 +405,7 @@ export class SceneObject { //things with Actions and fancy params, e.g. characte
             console.log(JSON.stringify(this.pickupAction));
             let data = {};
             data.sceneID = settings._id;
-            data.objectData = this.objectData;
+            data.object_item = this.objectData;
             data.name = this.objectData.name;
             data.action = this.pickupAction;
             data.sceneID = settings._id;
@@ -602,7 +602,7 @@ export class SceneObject { //things with Actions and fancy params, e.g. characte
 
     // hide
     pickupObject (data, thisObject) { //i.e. collect, put into user inventory
-        // console.log("tryna pickup " + JSON.stringify(data) + " this.objectData " + JSON.stringify(this.object));
+        console.log("tryna pickup " + JSON.stringify(data) + " this.objectData " + JSON.stringify(thisObject));
         // let objEl = document.getElementById(id);
         // if (objEl != null) {
         var xhr = new XMLHttpRequest();
@@ -635,7 +635,7 @@ export class SceneObject { //things with Actions and fancy params, e.g. characte
             
             
             
-            const htmlstring = "<br><br><h3>Sorry, you can't have any more of those!</h3>";
+            const htmlstring = "<br><br><h3>Sorry, you can't collect more of those!</h3>";
             ShowHTMLPopup(event, htmlstring, null, null, "hic_content");
             // popup.innerHTML = 
             // ShowPopup(lastEvent);
