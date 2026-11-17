@@ -2,7 +2,7 @@ import * as THREE from 'three/webgpu';
 import { SPZLoader } from 'three/addons/loaders/SPZLoader.js';
 import { GaussianSplat } from 'three/addons/objects/GaussianSplat.js'; //native three splatfu
 
-import { GpuArrays, SplatCollection, SplatRenderer, createRenderer, loadSplats } from "@sparkjsdev/radix";
+import { GpuArrays, SplatCollection, SplatRenderer, createRenderer, loadSplats } from "sparkjsdev/radix";
 
   // import { SplatMesh, SparkRenderer } from "sparkjsdev/spark";
 import {scene, renderer, StartButton, loadingHeader, splatObjex} from "./wgpu_main.mjs";

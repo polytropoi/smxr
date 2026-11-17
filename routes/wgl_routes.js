@@ -381,7 +381,7 @@ wgl_router.get('/:_id', function (req, res) {
                         // "\x22sparkjsdev/spark\x22: \x22https://sparkjs.dev/releases/spark/0.1.10/spark.module.js\x22,"+  
                         // "\x22sparkjsdev/spark\x22: \x22../platforms/threegl/src/spark.module.js\x22,"+     //lod branch!!
                         "\x22jsm/\x22: \x22https://cdn.jsdelivr.net/npm/three@0.181/examples/jsm/\x22,"+
-                        "\x22sparkjsdev/spark\x22: \x22https://sparkjs.dev/releases/spark/2.1.0/spark.module.js\x22,"+ 
+                        "\x22sparkjsdev/spark\x22: \x22https://sparkjs.dev/releases/spark/2.4.0/spark.module.js\x22,"+ 
                        
                              "\x22jsm/\x22: \x22https://cdn.jsdelivr.net/npm/three@0.181/examples/jsm/\x22,"+
                             "\x22three/addons/\x22: \x22https://cdn.jsdelivr.net/npm/three@0.181.0/examples/jsm/\x22,"+

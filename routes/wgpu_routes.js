@@ -427,6 +427,7 @@ wgpu_router.get('/:_id', function (req, res) {
     //                 "}"+
     //             "}</script>";
     
+
                    
     
     (async () => {
@@ -514,39 +515,79 @@ wgpu_router.get('/:_id', function (req, res) {
 
             }
 
-            let  importMap = "<script type=\x22importmap\x22> {\x22imports\x22: {" + 
+            let importMapTemplate = {imports: {}};
+            importMapTemplate.imports["three"] = "../node_modules/three/build/three.webgpu.js";
+            importMapTemplate.imports["three/webgpu"] = "../node_modules/three/build/three.webgpu.js";
+            importMapTemplate.imports["three/tsl"] = "../node_modules/three/build/three.tsl.js";
+            importMapTemplate.imports["three/addons/"] = "../node_modules/three/examples/jsm/";
+            importMapTemplate.imports["three-text/three"] = "../node_modules/three-text/dist/three/index.js";
+            importMapTemplate.imports["three-pathfinding"] = "/platforms/wgpu/src/three-pathfinding.module.js";
+            importMapTemplate.imports["rapier"] = "https://cdn.skypack.dev/@dimforge/rapier3d-compat";
+            importMapTemplate.imports["tsl-textures"] = "/platforms/wgpu/tsl/tsl-textures.js";
+            importMapTemplate.imports["tonal"] = "https://esm.sh/tonal";
+            importMapTemplate.imports["tonal"] = "https://esm.sh/tonal";
+            importMapTemplate.imports["mediapipe"] = "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0";
+            // importMapTemplate.imports["sparkjsdev/radix"] = "https://cdn.jsdelivr.net/npm/@sparkjsdev/radix@0.0.1/dist/radix.module.js";
+
+
+            if (sceneData.sceneTags.includes("radix")) {
+                
+                importMapTemplate.imports["sparkjsdev/radix"] = "https://cdn.jsdelivr.net/npm/@sparkjsdev/radix@0.0.1/dist/radix.module.js";
+            }
+            if (sceneData.sceneTags.includes("synth")) { 
+               
+                // importMapTemplate.imports["tonal"] = "https://esm.sh/tonal";
+            }
+            if (sceneData.sceneTags.includes("mediapipe")) { 
+                
+                // importMapTemplate.imports["mediapipe"] = "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0";
+
+            }
+            if (sceneData.sceneTags.includes("physics")) { 
+                
+                // importMapTemplate.imports["rapier"] = "https://cdn.skypack.dev/@dimforge/rapier3d-compat";
+
+            }
+            // if (sceneData.sceneTags[i].toLowerCase().includes("navcat")) {    //replace pathfinding?
+
+            
+            // }
+
+            let importMap = "<script type=\x22importmap\x22>" + JSON.stringify(importMapTemplate) + "</script>";
+
+            // let  importMap_ = "<script type=\x22importmap\x22> {\x22imports\x22: {" + 
          
-                    "\x22three\x22: \x22../node_modules/three/build/three.webgpu.js\x22,"+     
-                    "\x22three/webgpu\x22: \x22../node_modules/three/build/three.webgpu.js\x22,"+   
+            //         "\x22three\x22: \x22../node_modules/three/build/three.webgpu.js\x22,"+     
+            //         "\x22three/webgpu\x22: \x22../node_modules/three/build/three.webgpu.js\x22,"+   
                 
-                    "\x22three/tsl\x22: \x22../node_modules/three/build/three.tsl.js\x22,"+
-                    "\x22three/addons/\x22: \x22../node_modules/three/examples/jsm/\x22,"+
+            //         "\x22three/tsl\x22: \x22../node_modules/three/build/three.tsl.js\x22,"+
+            //         "\x22three/addons/\x22: \x22../node_modules/three/examples/jsm/\x22,"+
                 
 
-                    "\x22three-pathfinding\x22: \x22/platforms/wgpu/src/three-pathfinding.module.js\x22,"+
-                    "\x22tsl-textures\x22: \x22/platforms/wgpu/tsl/tsl-textures.js\x22,"+
-                        "\x22three-text/three\x22: \x22../node_modules/three-text/dist/three/index.js\x22,"+
-                        "\x22mediapipe\x22: \x22https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0\x22,"+ // todo alt importmap if "hands", etc..
+            //         "\x22three-pathfinding\x22: \x22/platforms/wgpu/src/three-pathfinding.module.js\x22,"+
+            //         "\x22tsl-textures\x22: \x22/platforms/wgpu/tsl/tsl-textures.js\x22,"+
+            //             "\x22three-text/three\x22: \x22../node_modules/three-text/dist/three/index.js\x22,"+
+            //             "\x22mediapipe\x22: \x22https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0\x22,"+ // todo alt importmap if "hands", etc..
 
-                    // "\x22@tonaljs/tonal\x22: \x22../node_modules/tonal/dist/index.js\x22,"+
-                    "\x22tonal\x22: \x22https://esm.sh/tonal\x22,"+
+            //         // "\x22@tonaljs/tonal\x22: \x22../node_modules/tonal/dist/index.js\x22,"+
+            //         "\x22tonal\x22: \x22https://esm.sh/tonal\x22,"+
                    
-                    // tonal +
-                    // radix +
-                    // mediapipe +
-                    // "tonal": "https://esm.sh"
-                     "\x22@sparkjsdev/radix\x22: \x22https://cdn.jsdelivr.net/npm/@sparkjsdev/radix@0.0.1/dist/radix.module.js\x22,"+
+            //         // tonal +
+            //         // radix +
+            //         // mediapipe +
+            //         // "tonal": "https://esm.sh"
+            //          "\x22@sparkjsdev/radix\x22: \x22https://cdn.jsdelivr.net/npm/@sparkjsdev/radix@0.0.1/dist/radix.module.js\x22,"+
                     
-                    "\x22rapier\x22: \x22https://cdn.skypack.dev/@dimforge/rapier3d-compat\x22"+
+            //         "\x22rapier\x22: \x22https://cdn.skypack.dev/@dimforge/rapier3d-compat\x22"+
 
-                    // "\x22three-html-render\x22: \x22../node_modules/three-html-render/\x22,"+
-                    // "\x22three-html-render/polyfill\x22: \x22../node_modules/three-html-render/polyfill.js\x22"+
-                        // "\x22three-html-render/polyfill\x22: \x22https://cdn.jsdelivr.net/npm/three-html-render/dist/polyfill.mjs\x22," +
-                        // "\x22three-html-render/html-texture\x22: \x22https://cdn.jsdelivr.net/npm/three-html-render/dist/html-texture.js\x22,"+
-                        // "\x22three-html-render/interaction-manager\x22: \x22https://cdn.jsdelivr.net/npm/three-html-render/dist/interaction-manager.js\x22"+
+            //         // "\x22three-html-render\x22: \x22../node_modules/three-html-render/\x22,"+
+            //         // "\x22three-html-render/polyfill\x22: \x22../node_modules/three-html-render/polyfill.js\x22"+
+            //             // "\x22three-html-render/polyfill\x22: \x22https://cdn.jsdelivr.net/npm/three-html-render/dist/polyfill.mjs\x22," +
+            //             // "\x22three-html-render/html-texture\x22: \x22https://cdn.jsdelivr.net/npm/three-html-render/dist/html-texture.js\x22,"+
+            //             // "\x22three-html-render/interaction-manager\x22: \x22https://cdn.jsdelivr.net/npm/three-html-render/dist/interaction-manager.js\x22"+
                     
-                    "}"+
-                "}</script>";
+            //         "}"+
+            //     "}</script>";
     
                    
             if (sceneData.sceneTags != null) {        
@@ -570,11 +611,7 @@ wgpu_router.get('/:_id', function (req, res) {
                     // "}</script>";
                     }
 
-                    if (sceneData.sceneTags[i].toLowerCase().includes("navcat")) {    
 
-                        
-                    
-                    }
 
 
                     // aframe-physics-system.min

@@ -4,12 +4,17 @@
 		uniform, vec2, pass } from 'three/tsl';
 	
 	import { outline } from 'three/addons/tsl/display/OutlineNode.js';
-
+	// import { outline } from "three/tsl";
+		// import { outline } from 'outline';
+	
 	import { gaussianBlur } from 'three/addons/tsl/display/GaussianBlurNode.js';
+	// import { gaussianBlur } from 'three/tsl';
 
 	import { dof } from 'three/addons/tsl/display/DepthOfFieldNode.js';
+	// import { dof } from 'three/tsl';
 
 	import { bloom } from 'three/addons/tsl/display/BloomNode.js';
+	// import { bloom } from 'three/tsl';
 
 	import { LoadPrimaryAudioHowl, PlayTriggerWithTag, ReturnAudioGroupsData, isPlaying } from '../../../connect/media.js';
 
