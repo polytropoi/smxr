@@ -322,18 +322,18 @@
 				visionModule = await import('./wgpu_vision.js');
 				video = await visionModule.getMediaPipeVideo();
 							const texture = new THREE.VideoTexture(video);
-			texture.colorSpace = THREE.SRGBColorSpace;
-			const geometry = new THREE.PlaneGeometry(1, 1);
-			const material = new THREE.MeshBasicMaterial({
-				map: texture,
-				depthWrite: false,
-				side: THREE.DoubleSide,
-			});
-			videomesh = new THREE.Mesh(geometry, material);
-			videomesh.rotation.y = Math.PI;
-			scene.add(videomesh);
+				texture.colorSpace = THREE.SRGBColorSpace;
+				const geometry = new THREE.PlaneGeometry(1, 1);
+				const material = new THREE.MeshBasicMaterial({
+					map: texture,
+					depthWrite: false,
+					side: THREE.DoubleSide,
+				});
+				videomesh = new THREE.Mesh(geometry, material);
+				videomesh.rotation.y = Math.PI;
+				scene.add(videomesh);
 			} else {
-				video = getWebcamVideo();
+				// getWebcamVideo();
 			}
 
 

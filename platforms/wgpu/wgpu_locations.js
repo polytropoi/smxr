@@ -8,7 +8,7 @@ import { settings } from '../../../connect/settings.js';
 
 import {SceneObject, sceneObjects} from './wgpu_actions.js';
 
-import {ScenePicture, triggerAudioController} from './wgpu_media.js';
+import {getWebcamVideo, ScenePicture, triggerAudioController} from './wgpu_media.js';
 
 import { SetSceneLocations, userData, localData } from '../../../connect/connect.js';
 
@@ -70,6 +70,7 @@ export let kinematicAgentMeshes = []; //children of navagents, for physics colli
 
 export let allSceneObjex = []; //ground and active and static
 
+export let videoMeshes = {};
 export async function LoadModel(url) {
     const loader = new GLTFLoader();
     try {
@@ -1004,6 +1005,7 @@ async function LoadLocationModel (url, locationData, isActive) {
         model.traverse(function (child) {
            
             const worldPos = new THREE.Vector3();
+            let noEnv = false;
             if (child.name  && child.name != undefined && typeof child.name === 'string') {
                 const name = child.name.toString();
                 
@@ -1061,7 +1063,21 @@ async function LoadLocationModel (url, locationData, isActive) {
                     // locationData.mediaID
                     // spotTargets.push(child.copy());
                 } else if (name.includes("hvid")) {
-                    child.material = PsychNoiseMaterial();
+
+                    if (settings && settings.sceneTags.includes("webcam")) {
+                        child.material = null;
+                        noEnv = true;
+                        // child.material = PsychNoiseMaterial();
+                        // child.material.envMap = null;
+                        // child.material.envNode = null;
+                        // child.material.roughness = 1;
+                        getWebcamVideo(child);
+                    } else {
+                        
+                        child.material = PsychNoiseMaterial();
+                        
+                    }
+                    
                 }
 
 
@@ -1084,7 +1100,7 @@ async function LoadLocationModel (url, locationData, isActive) {
                     // console.log("tryna hide model " + child.name);
                 } else {
                                                                 
-                    if (child.material) {
+                    if (child.material && !noEnv) {
 
                         child.castShadow = true;
                         child.receiveShadow = true;
@@ -1153,7 +1169,7 @@ async function LoadLocationModel (url, locationData, isActive) {
                                 console.log("gotsa navmesh child of model " + model.name);
                             navmesh = child;
                             navmesh.visible = false;
-                                    groundObjex.push(navmesh);
+                            groundObjex.push(navmesh);
 
                         }
                     }
@@ -1325,6 +1341,26 @@ async function CreateDefaultLocationMarker(locationData) { //use default model o
             // model.material.color = "orange";
             console.log("adding a light! ");
         // }
+        break;
+
+        case "video":
+
+        if (locationData.modelID && locationData.modelID.includes("primitive")) {
+            model = await LoadLocationModel(null, locationData, true);
+        } else {
+            model = await LoadLocationModel('https://servicemedia.s3.amazonaws.com/assets/models/poi1b.glb', locationData, true);
+            // locationData.modelID = "primitive_sphere";
+            // model = await LoadLocationModel(null, locationData, true);
+            // model.material.wireframe = true;
+            // model.material.color = "yellow";
+        }
+         if (model) {
+            scene.add(model.model);
+            if (locationData.eventData.includes("webcam")) {
+                getWebcamVideo(model.model, locationData);
+            }
+            console.log("adding a video mesh! " + model.name);
+        }
         break;
     }
 }

@@ -17,7 +17,7 @@ import { texture, color, float, uv, equirectUV, positionLocal, vec3, vec2, sin, 
 
 import { UpdateEnvMap } from './wgpu_environment.js';
 import { pauseVideo, playVideo } from '../../connect/media.js';
-import { picPlaces } from './wgpu_locations.js';
+import { picPlaces, playerPosition } from './wgpu_locations.js';
 import { Quaternion } from 'three';
 
 
@@ -40,7 +40,6 @@ export let sceneVideoPlayer;
 export let mediaPlayersToUpdate = [];
 
 export let pictureGroupIndexes = {};
-
 
 const eventEl = document.getElementById("eventEl");
 export let webcamEl;// = document.createElement("video");
@@ -1323,7 +1322,7 @@ export class ScenePicture {
 }
 // const videoEl = document.createElement("videoEl");
 
-export async function getWebcamVideo() {
+export async function getWebcamVideo(mesh, locationData) {
 // if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
 //     const webcamEl = document.createElement("video");
 //     navigator.mediaDevices
@@ -1338,26 +1337,50 @@ export async function getWebcamVideo() {
 //       });
 //   }
 //   return webcamEl;
-        const video = document.createElement('video');
-        video.autoplay = true;
-        video.playsInline = true;
-        video.muted = true; 
-        navigator.mediaDevices.getUserMedia({ video: true, audio: false })
-        .then((stream) => {
-            video.srcObject = stream;
-            video.play();
-        })
-        .catch((err) => {
-            console.error('Error accessing webcam:', err);
-        });
+    const video = document.createElement('video');
+    video.autoplay = true;
+    video.playsInline = true;
+    video.muted = true; 
+    navigator.mediaDevices.getUserMedia({ video: true, audio: false })
+    .then((stream) => {
+        video.srcObject = stream;
+        video.play();
+    })
+    .catch((err) => {
+        console.error('Error accessing webcam:', err);
+    });
 
-        // 3. Create a Three.js VideoTexture using the video element
-        const videoTexture = new THREE.VideoTexture(video);
-        videoTexture.colorSpace = THREE.SRGBColorSpace; // Recommended for accurate colors
-
-        // 4. Create a material and geometry, then map the video texture
+    // 3. Create a Three.js VideoTexture using the video element
+    const videoTexture = new THREE.VideoTexture(video);
+    videoTexture.colorSpace = THREE.SRGBColorSpace; // Recommended for accurate colors
+   
+    if (!mesh) {
         const geometry = new THREE.BoxGeometry(2, 2, 2);
-        const material = new THREE.MeshBasicMaterial({ map: videoTexture });
+ const material = new THREE.MeshBasicMaterial({ map: videoTexture });
+    material.envMap = null;
+    material.needsUpdate = true;
         const cube = new THREE.Mesh(geometry, material);
         scene.add(cube);
+        if (!locationData) {
+            cube.position.set(0,1,-5);
+        }
+    } else {
+         const material = new THREE.MeshBasicMaterial({ map: videoTexture });
+        
+        material.needsUpdate = true;
+        mesh.material = material;
+        mesh.material.envMap = null;
+        mesh.material.needsUpdate = true;
+        // mesh.material.envMap = null;
+        // mesh.material.roughness = 1;
+        if (!locationData) {
+
+        } else {
+            mesh.position.set(locationData.x, locationData.y, locationData.z)
+            if (locationData.locationTags && locationData.locationTags.includes("lookat")) {
+                lookAtCameraObjects.push(mesh);
+            } 
+        }
+    }
+        
 }
