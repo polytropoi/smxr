@@ -1,14 +1,7 @@
 import { Text, TextStyle, Assets, Container } from 'pixi';
-import { fontFillColor, fontFillColorAlt, font1, stripExtension, app, viewport } from './vtt_main.mjs';
+import { fontFillColor, fontFillColorAlt, font1, stripExtension, app, viewport } from './pixi_main.mjs';
 import { settings } from '../../../connect/settings.js';
-// import { ReturnUserProfile } from '../connect/vtt.js';
-// Load font before use
-// await Assets.load({
-//     src: '../../fonts/web/Acme.woff',
-//     // data: {
-//     //     family: 'MyFont', // optional
-//     // }
-// });
+
 
 
 

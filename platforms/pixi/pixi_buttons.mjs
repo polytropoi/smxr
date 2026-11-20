@@ -3,9 +3,9 @@ import { Assets, Graphics, Container, Text } from 'pixi';
 import { Button, ButtonContainer, FancyButton } from '@pixi/ui';
 
 import { PrimaryAudioPlayPauseToggle, ReturnTimedEventsListenerMode, PrimaryAudioIsPlaying, isPlaying } from '../../../connect/media.js';
-import { addBackgroundPictures, addBackgroundVideos } from './addBackground.mjs';
-import { app, viewport, hasBgMap, font1, stripExtension, hasAudioViz } from './vtt_main.mjs';
-import { InitAnalyzer } from './vtt_audioViz.mjs';
+import { addBackgroundPictures, addBackgroundVideos } from './pixi_background.mjs';
+import { app, viewport, hasBgMap, font1, stripExtension, hasAudioViz } from './pixi_main.mjs';
+import { InitAnalyzer } from './pixi_audioViz.mjs';
 // export let isPlaying = false;
 // import 
 

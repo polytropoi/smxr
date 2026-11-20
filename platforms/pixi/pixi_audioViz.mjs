@@ -5,7 +5,7 @@ import AudioMotionAnalyzer from '../../../main/js/audioMotion-analyzer.js';
 import { primaryAudioElement } from '../../../connect/media.js';
 
 import { Select } from '@pixi/ui';
-import { app} from './vtt_main.mjs';
+import { app} from './pixi_main.mjs';
 
 let maxAudioRecordTime = 10000; //10 seconds
 let speechDetection = false;

@@ -1,16 +1,14 @@
 import { Sprite, Container, Assets, Spritesheet, TilingSprite, Texture, ColorMatrixFilter } from 'pixi';
-// import 'pixi.js/advanced-blend-modes';
-// import '../main/js/pixi/pixi.min.mjs/advanced-blend-modes'
-// import { CompositeTilemap } from 'pixi-tilemap';
+
 import { SetSelectedPosition } from '../../connect/events.js';
 import { keydown, CreateNewLocation } from '../../../connect/dialogs.js';
 import { viewport, sceneTags, mappicURL, backgroundVideoURL, pictureGroupsData, 
   viewportHorizontalCenter, viewportVerticalCenter, SetViewportVerticalCenter, SetViewportHorizontalCenter, spritesContainer,
-  videoGroupsData} from './vtt_main.mjs';
-import { addGridOverlay } from './addOverlay.mjs';
+  videoGroupsData} from './pixi_main.mjs';
+import { addGridOverlay } from './pixi_overlay.mjs';
 
-import { AddLocation } from './vtt_locations.mjs';
-import {applyFilters} from './vtt_filters.mjs';
+import { AddLocation } from './pixi_locations.mjs';
+import {applyFilters} from './pixi_filters.mjs';
 export let mapsize = {};
 
 export let background;

@@ -1,8 +1,8 @@
 import { DisplacementFilter, Sprite, ColorMatrixFilter } from 'pixi';
 // import 'pixi/advanced-blend-modes';  
-import { background } from './addBackground.mjs';
+import { background } from './pixi_background.mjs';
 
-import { sceneTags} from './vtt_main.mjs';
+import { sceneTags} from './pixi_main.mjs';
 
 import { AdvancedBloomFilter, ReflectionFilter, OldFilmFilter, HslAdjustmentFilter } from '@pixi/filters';
 

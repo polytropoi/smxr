@@ -3,8 +3,8 @@
 import { Application, Assets, Point, AnimatedSprite, Container, Sprite, Spritesheet } from 'pixi';
 import { AdvancedBloomFilter, ReflectionFilter } from '@pixi/filters';
 import { PlayTriggerWithTag } from '../../../connect/media.js';
-import { mapsize } from './addBackground.mjs';
-import { app, viewport } from './vtt_main.mjs';
+import { mapsize } from './pixi_background.mjs';
+import { app, viewport } from './pixi_main.mjs';
 
   const allBlendModes = [
     'normal',

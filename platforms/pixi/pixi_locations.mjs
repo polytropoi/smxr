@@ -7,7 +7,7 @@ import { localData, CreateLocationAlt } from '../../../connect/connect.js';
 import { mods } from '../../../connect/settings.js';
 
 // import { dragTarget, onDragStart, onDragMove, onDragEnd } from './addElements.mjs';
-import { app, viewport, hasBgMap } from './vtt_main.mjs';
+import { app, viewport, hasBgMap } from './pixi_main.mjs';
 import { SaveLocalData } from '../../../connect/indexedDb.js';
 
 

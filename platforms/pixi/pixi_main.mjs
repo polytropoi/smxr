@@ -1,26 +1,34 @@
 // import '@pixi/layout'; 
 import { Application, Assets, Graphics, Texture, Container, RenderLayer, Sprite } from 'pixi';
+
+
+
 import { Viewport } from 'pixi-viewport';
 
 
 // import { LayoutSystem } from '@pixi/layout';
-import { addBackground, addMap, addBackgroundVideo, addBackgroundPictures, addBackgroundVideos, background } from './addBackground.mjs';
-import { addText, addPlayerProfileText, addEventText } from './addText.mjs';
-import { addAnimatedSprite, addSprite, animateElements, spriteFilter } from './addElements.mjs';
-import { addDisplacementEffect } from './vtt_filters.mjs';
-import { addGridOverlay, addWaterOverlay, animateWaterOverlay } from './addOverlay.mjs';
-import { ReturnMap, ReturnBackground, ReturnBackgroundVideo, ReturnSprites, ReturnText, ReturnScenePictures, ReturnPictureGroups, ReturnLocations  } from '../../../connect/vtt.js';
+import { addBackground, addMap, addBackgroundVideo, addBackgroundPictures, addBackgroundVideos, background } from './pixi_background.mjs';
+import { addText, addPlayerProfileText, addEventText } from './pixi_text.mjs';
+import { addAnimatedSprite, addSprite, animateElements, spriteFilter } from './pixi_elements.mjs';
+import { addDisplacementEffect } from './pixi_filters.mjs';
+import { addGridOverlay, addWaterOverlay, animateWaterOverlay } from './pixi_overlay.mjs';
+import { ReturnMap, ReturnBackground, ReturnBackgroundVideo, ReturnSprites, ReturnText, ReturnScenePictures, ReturnPictureGroups, ReturnLocations  } from '../../../connect/pixi.js';
 import { LoadPrimaryAudioHowl, ReturnAudioGroupsData, isPlaying } from '../../../connect/media.js';
 import { settings, profile, pixelsPerMeterActual } from '../../../connect/settings.js';
 import { timedEventsListenerMode, PauseIntervals, SetTimedEventsListenerMode, timeKeysData, SetSelectedPosition} from "../../../connect/events.js";
 // import { keydown, CreateNewLocation } from '../connect/dialogs.js';
-import { addButtons, addPlayButton, addSimplePlayButton } from './addButtons.mjs';
+import { addButtons, addPlayButton, addSimplePlayButton } from './pixi_buttons.mjs';
 
-import { LoadLocations, AddLocation, locationTokenContainer } from './vtt_locations.mjs';
+import { LoadLocations, AddLocation, locationTokenContainer } from './pixi_locations.mjs';
 import { SetTimeKeysData } from '../../../connect/events.js';
 import { poiLocations } from '../../../connect/connect.js';
+
+
+// import { CubeGeometry, DirectionalLight, Material3D, Mesh3D, View3D } from '@pixi/3d'; //hrm, wants pixi.js, not pixi import
+// import { OrbitCamera } from '@pixi/3d/extras';
+
 // import { keydown } from '../connect/dialogs.js';
-import { addAudioVizSelect } from './vtt_audioViz.mjs';
+import { addAudioVizSelect } from './pixi_audioViz.mjs';
 export const app = new Application();
 export let sceneTags;
 
@@ -228,7 +236,7 @@ async function prePreLoader () {
     }
   }, 1000); 
 
-  let picGroupMgr = document.getElementById("pictureGroupsData"); //hrm, should do this here for all the ones in vtt.js
+  let picGroupMgr = document.getElementById("pictureGroupsData"); //hrm, should do this here for all the ones in pixi.js
   if (picGroupMgr) {
     const theData = picGroupMgr.getAttribute('data-picture-groups');
     pictureGroupsData = JSON.parse(atob(theData)); //convert from base64
@@ -359,7 +367,7 @@ export function playerProfileLoaded (playerProfile) {
 }
 
 
-export async function GoWithIt() { //called from vtt.js
+export async function GoWithIt() { //called from pixi.js
   await setup();
   await prePreLoader();
   await preload();

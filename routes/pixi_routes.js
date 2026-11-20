@@ -367,29 +367,48 @@ pixi_router.get('/:_id', function (req, res) {
 
     let xrmode =  "xr-mode-ui=\x22XRMode: xr\x22";
 
-    let importMap = "<script type=\x22importmap\x22> {\x22imports\x22: {" + 
+    // let importMap_ = "<script type=\x22importmap\x22> {\x22imports\x22: {" + 
                           
-                        "\x22pixi\x22: \x22../main/js/pixi/pixi.min.mjs?v=1\x22,"+  //ok, then
-                        "\x22advanced-blend-modes\x22: \x22../main/js/pixi/pixi.min.mjs/advanced-blend-modes\x22,"+
-                        // "\x22pixi-viewport\x22: \x22https://cdn.jsdelivr.net/npm/pixi-viewport@6.0.3/dist/pixi_viewport.min.js\x22"+
-                            // "\x22pixi-viewport\x22: \x22../main/js/pixi/viewport.min.mjs\x22,"+
+    //                     "\x22pixi\x22: \x22../main/js/pixi/pixi.min.mjs?v=1\x22,"+  //ok, then
+    //                     "\x22advanced-blend-modes\x22: \x22../main/js/pixi/pixi.min.mjs/advanced-blend-modes\x22,"+
+    //                     // "\x22pixi-viewport\x22: \x22https://cdn.jsdelivr.net/npm/pixi-viewport@6.0.3/dist/pixi_viewport.min.js\x22"+
+    //                         // "\x22pixi-viewport\x22: \x22../main/js/pixi/viewport.min.mjs\x22,"+
                         
-                        "\x22pixi-contstants\x22: \x22../main/js/pixi/pixi.constants.min.mjs\x22,"+
-                        "\x22pixi-viewport\x22: \x22../main/js/pixi/viewport.min.mjs\x22,"+
-                        "\x22@pixi/ui\x22: \x22../main/js/pixi/pixi.ui.mjs\x22,"+
-                        "\x22@pixi/filters\x22: \x22../main/js/pixi/pixi-filters.mjs\x22,"+
-                        "\x22@pixi/layout\x22: \x22../main/js/pixi/layout.min.mjs\x22"+
-                        // "\x22WaveSurfer\x22: \x22https://cdn.jsdelivr.net/npm/wavesurfer.js@7/dist/wavesurfer.esm.js\x22"+
+    //                     "\x22pixi-contstants\x22: \x22../main/js/pixi/pixi.constants.min.mjs\x22,"+
+    //                     "\x22pixi-viewport\x22: \x22../main/js/pixi/viewport.min.mjs\x22,"+
+    //                     "\x22@pixi/ui\x22: \x22../main/js/pixi/pixi.ui.mjs\x22,"+
+    //                     "\x22@pixi/filters\x22: \x22../main/js/pixi/pixi-filters.mjs\x22,"+
+    //                     "\x22@pixi/layout\x22: \x22../main/js/pixi/layout.min.mjs\x22"+
+    //                     // "\x22WaveSurfer\x22: \x22https://cdn.jsdelivr.net/npm/wavesurfer.js@7/dist/wavesurfer.esm.js\x22"+
 
-                        // "\x22pixi-viewport\x22: \x22https://cdn.jsdelivr.net/npm/pixi-viewport@6.0.3/+esm\x22"+
+    //                     // "\x22pixi-viewport\x22: \x22https://cdn.jsdelivr.net/npm/pixi-viewport@6.0.3/+esm\x22"+
                         
-                        // "\x22howlerspatial\x22: \x22https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.4/howler.spatial.min.js\x22"+  //ok, then
+    //                     // "\x22howlerspatial\x22: \x22https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.4/howler.spatial.min.js\x22"+  //ok, then
                        
                      
                     
-                        "}"+
-                    "}</script>";
-    // let importMap = "";
+    //                     "}"+
+    //                 "}</script>";
+
+
+
+    let importMapTemplate = {imports: {}};
+
+        importMapTemplate.imports["pixi"] = "https://cdn.jsdelivr.net/npm/pixi.js@8.23.0/dist/pixi.min.mjs";
+
+        importMapTemplate.imports["@pixi/3d"] = "https://cdn.jsdelivr.net/npm/@pixi/3d@0.1.0/dist/pixijs-3d.min.mjs";
+
+        importMapTemplate.imports["@pixi/3d/extras"] = "https://cdn.jsdelivr.net/npm/@pixi/3d@0.1.0/dist/pixijs-3d.min.mjs";
+
+        // importMapTemplate.imports["pixi"] = "../main/js/pixi/pixi.min.mjs?v=1";
+        importMapTemplate.imports["advanced-blend-modes"] = "../main/js/pixi/pixi.min.mjs/advanced-blend-modes";
+        importMapTemplate.imports["pixi-constants"] = "../main/js/pixi/pixi.constants.min.mjs";
+        importMapTemplate.imports["pixi-viewport"] = "../main/js/pixi/viewport.min.mjs";
+        importMapTemplate.imports["@pixi/ui"] = "../main/js/pixi/pixi.ui.mjs";
+        importMapTemplate.imports["@pixi/filters"] = "../main/js/pixi/pixi-filters.mjs";
+        importMapTemplate.imports["@pixi/layout"] = "../main/js/pixi/layout.min.mjs";
+
+    let importMap = "<script type=\x22importmap\x22>" + JSON.stringify(importMapTemplate) + "</script>";
     
     (async () => {
         try {
@@ -3218,7 +3237,7 @@ pixi_router.get('/:_id', function (req, res) {
 
                         // "<script type=\x22module\x22>import pixiViewport from \x22https://cdn.jsdelivr.net/npm/pixi-viewport@6.0.3/+esm\x22</script>" +
                         "<script src=\x22../main/vendor/howler/src/howler.js\x22></script>" +
-                        "<script type=\x22module\x22 src=\x22/connect/vtt.js\x22 defer=\x22defer\x22></script>" + //this one talks to pixi
+                        "<script type=\x22module\x22 src=\x22/connect/pixi.js\x22 defer=\x22defer\x22></script>" + //this one talks to pixi
                         // "<script type=\x22module\x22 src=\x22/connect/media.js\x22 defer=\x22defer\x22></script>" +
                         "<script src=\x22/main/vendor/jquery/jquery.min.js\x22></script>" +
 
@@ -3338,13 +3357,13 @@ pixi_router.get('/:_id', function (req, res) {
                         // // "<input type=\x22range\x22 style=\x22width: 100%, height: 50px\x22 min=\x221\x22 max=\x22100\x22 value=\x2250\x22 class=\x22sslider_\x22 id=\x22primaryAudioSlider_\x22>"+
                         // "</div>"+
                                                 
-                        "<script type=\x22module\x22 src=\x22../platforms/pixi/addBackground.mjs\x22></script>" +
-                        "<script type=\x22module\x22 src=\x22../platforms/pixi/addElements.mjs\x22></script>" +
-                        "<script type=\x22module\x22 src=\x22../platforms/pixi/addOverlay.mjs\x22></script>" +
-                        "<script type=\x22module\x22 src=\x22../platforms/pixi/vtt_filters.mjs\x22></script>" +  
-                        "<script type=\x22module\x22 src=\x22../platforms/pixi/vtt_main.mjs\x22 ></script>" +
+                        "<script type=\x22module\x22 src=\x22../platforms/pixi/pixi_background.mjs\x22></script>" +
+                        "<script type=\x22module\x22 src=\x22../platforms/pixi/pixi_elements.mjs\x22></script>" +
+                        "<script type=\x22module\x22 src=\x22../platforms/pixi/pixi_overlay.mjs\x22></script>" +
+                        "<script type=\x22module\x22 src=\x22../platforms/pixi/pixi_filters.mjs\x22></script>" +  
+                        "<script type=\x22module\x22 src=\x22../platforms/pixi/pixi_main.mjs\x22 ></script>" +
 
-                        "<script type=\x22module\x22 src=\x22../platforms/pixi/vtt_audioViz.mjs\x22 ></script>" +
+                        "<script type=\x22module\x22 src=\x22../platforms/pixi/pixi_audioViz.mjs\x22 ></script>" +
                         "<div id=\x22audioVizContainer\x22></div>"+
 
                         // audioHtml +
