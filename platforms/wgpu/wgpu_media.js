@@ -1,5 +1,7 @@
 
 import * as THREE from 'three';
+
+import TWEEN from '@tweenjs/tween.js';
 // import * as Tone from 'tone';
 // import { Note, Scale } from "tonal";
 import { player, camera } from './wgpu_controls.js';
@@ -1399,9 +1401,31 @@ export class Beatable {
     triggerBeat () {
         console.log("triggerBeat!")
         this.beatMe = true;
-        this.update();
+
+        this.mesh.scale.set(1, 1, 1);
+        // this.mesh.material.opacity = 1;
+
+        const scaleUp = new TWEEN.Tween(this.mesh.scale)
+            .to({ x: 1.5, y: 1.5, z: 1.5 }, 250)
+            .easing(TWEEN.Easing.Quadratic.Out);
+            // .repeat(1);
+            // .start();
+        const scaleDown = new TWEEN.Tween(this.mesh.scale)
+            .to({ x: 1, y: 1, z: 1 }, 250)
+            .easing(TWEEN.Easing.Quadratic.Out);
+            // .repeat(1);
+            // .start();
+
+            scaleUp.chain(scaleDown);
+            scaleUp.start();
+        // new TWEEN.Tween(this.mesh.material)
+        //     .to({ opacity: 0 }, 1200)
+        //     .easing(TWEEN.Easing.Quadratic.Out)
+        //     .repeat(1)
+        //     .start();
+        // this.update();
     }
-    update () {
+    update (delta) {
 
         if (this.beatMe) {
             console.log("tryna update a beatable!");
@@ -1410,9 +1434,9 @@ export class Beatable {
                 this.mesh.scale.set(this.oScale,this.oScale,this.oScale);
                 this.alpha = 0;
             } else {
-                this.alpha = 1 - Math.exp(-10 * timer.getDelta());
+                this.alpha = 1 - Math.exp(-10 * delta);
                 this.mesh.scale.lerp(this.targetScale, this.alpha);
-                this.update();
+                // this.update();
             }
         
         }

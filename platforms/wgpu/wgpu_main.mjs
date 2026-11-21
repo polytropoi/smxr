@@ -1,4 +1,6 @@
 	import * as THREE from 'three/webgpu';
+	
+	import TWEEN from '@tweenjs/tween.js';
 
 	import { color, objectPosition, screenUV, 
 		uniform, vec2, pass } from 'three/tsl';
@@ -55,7 +57,7 @@
 	
 	import { SetControls, onKeyDown, onKeyUp, onMouseDown, onMouseMove, onMouseUp, onMouseWheel, player, camera, isReady, UpdateControls, cameraWorldPosition, cameraAtZero } from './wgpu_controls.js';
 	
-	import { InitAudioGroups, InitPictureGroups, ambientAudioController, InitSceneText, mediaPlayersToUpdate, InitVideoGroups, availableScenesData, InitSceneMedia, getWebcamVideo } from './wgpu_media.js';
+	import { InitAudioGroups, InitPictureGroups, ambientAudioController, InitSceneText, mediaPlayersToUpdate, InitVideoGroups, availableScenesData, InitSceneMedia, getWebcamVideo, beatables } from './wgpu_media.js';
 	
 	import { equipOnLoadEvent, LoadSceneInventory, EquipInventoryCheck } from './wgpu_inventory.js';
 
@@ -804,6 +806,11 @@
 				interactionManager.update();
 			}
 
+			// beatables.forEach(a => 
+			// 	a.update(delta));
+
+			TWEEN.update();
+
 			if (rapierDebugRenderer && showDebug) {
 				rapierDebugRenderer.update();
 			}		
@@ -868,13 +875,7 @@
 				}
 
 				world.step(eventQueue); 
-				// npcKinematicBodies.forEach(k => 
-				// 	k.update());
-
-				// world.step();//!!! still wonky with lots of dynamic and kinematic
-
-				// Pass eventQueue to collect events
-
+				
 				// Handle collision events
 				// eventQueue.drainIntersectionEvents((handle1, handle2, intersecting) => {
 				// 	console.log(`Sensor ${handle1} intersection with ${handle2}: ${intersecting}`);
@@ -901,29 +902,29 @@
   				eventQueue.drainContactForceEvents((event) => { //for dynamic hits
 					if (scene) {
 					// if (event.started) {
-					let handle1 = event.collider1(); // Handle of the first collider involved in the event.
-					let handle2 = event.collider2(); // Handle of the second collider involved in the event.
+						let handle1 = event.collider1(); // Handle of the first collider involved in the event.
+						let handle2 = event.collider2(); // Handle of the second collider involved in the event.
 
-					let totalForce = event.totalForceMagnitude();
+						let totalForce = event.totalForceMagnitude();
 
-					 let collider1 = world.getCollider(handle1);
-					let collider2 = world.getCollider(handle2);
-					
-					// Retrieve parent rigid bodies if needed
-					let body1 = collider1.parent();
-					let body2 = collider2.parent();
+							let collider1 = world.getCollider(handle1);
+						let collider2 = world.getCollider(handle2);
+						
+						// Retrieve parent rigid bodies if needed
+						let body1 = collider1.parent();
+						let body2 = collider2.parent();
 
-					// 2. Create an empty vector to hold the result
-					const midpoint = new THREE.Vector3();
-					// const playerWorldPosition = new Vector
-					
-					// 3. Add them together and divide by 2
-					midpoint.addVectors(body1.translation(), body2.translation()).divideScalar(2);
-					const distance = player.position.distanceTo(midpoint);
-					// console.log(midpoint);
-					// console.log("collision " + handle1 + " " + handle2 + " " + JSON.stringify(body1.translation()) + " " + JSON.stringify(body2.translation()));
-					// if (totalForce > 100)  {
-		
+						// 2. Create an empty vector to hold the result
+						const midpoint = new THREE.Vector3();
+						// const playerWorldPosition = new Vector
+						
+						// 3. Add them together and divide by 2
+						midpoint.addVectors(body1.translation(), body2.translation()).divideScalar(2);
+						const distance = player.position.distanceTo(midpoint);
+						// console.log(midpoint);
+						// console.log("collision " + handle1 + " " + handle2 + " " + JSON.stringify(body1.translation()) + " " + JSON.stringify(body2.translation()));
+						// if (totalForce > 100)  {
+			
 						// if (superSonicLoaded) {
 						if (colliders[handle1].includes("atom") && colliders[handle2].includes("atom")) {
 							console.log("atom hit");
@@ -931,99 +932,6 @@
 							console.log("collision " + colliders[handle1] + " " + colliders[handle2] + " " + JSON.stringify(midpoint) + " force " + totalForce + " distance " + distance);
 							SynthHit(midpoint, totalForce, distance);
 						}
-							
-						// }
-						
-					// }
-					
-					// console.log(`Collider ${handle1} hit Collider ${handle2} with a force of ${totalForce}!`);
-
-					// Example: Play a sound proportional to the impact force
-					// if (totalForce > 20) {
-					// 	// playLoudCrashSound();
-						
-					// } else {
-					// 	// playSoftThudSound();
-					// }
-					/* Handle the contact force event. */
-					// });
-					// eventQueue.drainCollisionEvents((handle1, handle2, started) => {
-					// if (started) {
-						
-
-					// 	 let collider1 = world.getCollider(handle1);
-					// 	let collider2 = world.getCollider(handle2);
-						
-					// 	// Retrieve parent rigid bodies if needed
-					// 	let body1 = collider1.parent();
-					// 	let body2 = collider2.parent();
-
-					// 	// 2. Create an empty vector to hold the result
-					// 	const midpoint = new THREE.Vector3();
-
-					// 	// 3. Add them together and divide by 2
-					// 	midpoint.addVectors(body1.translation(), body2.translation()).divideScalar(2);
-
-					// 	// console.log(midpoint);
-					// 	// console.log("collision " + handle1 + " " + handle2 + " " + JSON.stringify(body1.translation()) + " " + JSON.stringify(body2.translation()));
-					// 	console.log("collision " + handle1 + " " + handle2 + " " + JSON.stringify(midpoint));
-					// 	// console.log()
-					// 	world.narrowPhase.contactPair(handle1, handle2, (manifold, flipped) => {
-					// 	// 3. Get the number of contact points
-					// 	let numContacts = manifold.numContacts();
-					// 	if (numContacts > 0) {
-					// 		// Get the first contact point data
-					// 		let contactPoint = manifold.contactPoint(0);
-							
-					// 		// The position is given in world-space coordinates
-					// 		console.log("Collision World Position:", contactPoint.point);
-					// 	}
-					// });
-						
-						// CollisionStart(handle1, handle2);
-							// console.log("collision " + handle1 + " " + handle2);
-							// const collider1 = world.getCollider(handle1);
-							// const collider2 = world.getCollider(handle2);
-
-							// // 2. Query the world for the detailed contact manifold data
-							// world.contactPair(collider1, collider2, (manifold, flipped) => {
-
-							// 	console.log("contact points " + manifold.numPoints());
-							// for (let i = 0; i < manifold.numPoints(); i++) {
-							// const point = manifold.point(i);
-
-							// // Rapier returns contact points in LOCAL space by default.
-							// // We multiply them by the collider's world transform to get Three.js positions.
-							// const localPoint = point.localP1; // or localP2 depending on 'flipped'
-							
-							// // Convert to a Three.js Vector3 to use in your visual scene
-							// const worldPosition = new THREE.Vector3(localPoint.x, localPoint.y, localPoint.z);
-							// worldPosition.applyMatrix4(getColliderWorldMatrix(collider1));
-
-							// console.log("Collision world position:", worldPosition);
-						// }
-						//  world.contactPair(handle1, handle2, (manifold, flipped) => {
-							
-							// Get the collision normal vector in world space
-								// const worldNormal = manifold.normal(); // {x, y, z}
-								
-								// // Get the total number of contact points inside this manifold
-								// const numPoints = manifold.numPoints(); 
-
-								// for (let i = 0; i < numPoints; i++) {
-								// 	// Retrieve individual contact point locations in world-space coordinates
-								// 	const contactPoint = manifold.solverContactPoint(i); // {x, y, z}
-								// 	const penetrationDepth = manifold.contactDist(i);
-
-								// 	console.log(`Collision Point ${i}:`, contactPoint);
-								// 	console.log(`Penetration Depth:`, penetrationDepth);
-								// }
-						// });
-						
-						// You can add logic here, e.g., change color of the collided objects
-					// } else {
-					// 	CollisionEnd(handle1, handle2);
-						
 					}
 				});
 			}
