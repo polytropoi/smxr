@@ -8,7 +8,7 @@ import { settings } from '../../../connect/settings.js';
 
 import {SceneObject, sceneObjects} from './wgpu_actions.js';
 
-import {getWebcamVideo, ScenePicture, triggerAudioController} from './wgpu_media.js';
+import {Beatable, getWebcamVideo, ScenePicture, triggerAudioController} from './wgpu_media.js';
 
 import { SetSceneLocations, userData, localData } from '../../../connect/connect.js';
 
@@ -22,7 +22,7 @@ import { instancedModels, createDefaultSurface, SetSurface, InstanceOnSurface } 
 
 import { CreatePointLight, CreateSpotLight, spotTargets } from './wgpu_lights.js';
 
-import { convertGltfToNodeMaterial, GetAvailableScenesData, InitLocationModelVideo } from './wgpu_media.js';
+import { convertGltfToNodeMaterial, GetAvailableScenesData, InitLocationModelVideo, beatables } from './wgpu_media.js';
 
 import { getTriggerBody, staticBodies, getModelKinematicBody, kinematicBodies, npcKinematicBodies } from './wgpu_physics.js';
 import { agentModels, CreateNPCAgent, randomNavmeshPoint, InitPathfinding, pathfinding } from './wgpu_nav.js';
@@ -71,6 +71,8 @@ export let kinematicAgentMeshes = []; //children of navagents, for physics colli
 export let allSceneObjex = []; //ground and active and static
 
 export let videoMeshes = {};
+
+// export let beatables = [];
 export async function LoadModel(url) {
     const loader = new GLTFLoader();
     try {
@@ -84,58 +86,19 @@ export async function LoadModel(url) {
 
 export function SetGeneratedNavmesh(mesh) {
 
-//     const theNavmesh = mesh.clone();
+    navmesh = mesh;
+    groundObjex.push(mesh);
 
-//     console.log("tryna SetGeneratedNavmesh");
-//     theNavmesh.material = theNavmesh.material.clone(); 
-//     theNavmesh.material.wireframe = true;
-//     theNavmesh.material.color = 'red';
-
-//     //  theNavmesh.rotateX(-Math.PI / 2);
-//     theNavmesh.position.set(0,.2,0);
-           
-//            const navMeshGeometry = theNavmesh.geometry;
-// // Ensure geometry.attributes.position exists and is populated
-// const posAttribute = navMeshGeometry.attributes.position;   
-//            scene.add(theNavmesh);
-//         //   
-        // if (mesh.geometry) {
-            // mesh.updateMatrixWorld(); 
-        // }
-               
-        navmesh = mesh;
-
-
-        // scene.add(navmesh);
-        groundObjex.push(mesh);
-
-        if (settings.sceneTags.includes("debug")) {
-            navmesh.visible = true;
-        } else {
-            navmesh.visible = false;
-        }
-
+    if (settings.sceneTags.includes("debug")) {
+        navmesh.visible = true;
+    } else {
+        navmesh.visible = false;
+    }
     InitPathfinding();
 }
 
 
 let localDataReady = false;
-// export function createDefaultNavmesh() {
-//     if (!navmesh) {
-//         const planeGeometry = new THREE.PlaneGeometry(100, 100, 10, 10); // 50 x 50
-//     //   planeGeometry.rotation.x = Math.PI / 2 * -1;
-//         const planeMaterial = new THREE.MeshStandardMaterial({ wireframe: true, color: 'hotpink' });
-//         let navmeshObject = new THREE.Mesh(planeGeometry, planeMaterial);
-        
-//         // navmeshObject.position.set(0,0,0);
-//         // navmeshObject.scale.set(1,1,1);
-//         navmeshObject.rotation.x = Math.PI / 2;
-//         navmeshObject.updateMatrixWorld();
-//         navmesh = navmeshObject;
-        
-//         scene.add(navmeshObject);
-//     }
-// }
 
 
  class MeshMover{
@@ -484,7 +447,7 @@ export async function InitLocations() {
         })();
         
     }
-}
+} //end InitLocaitons
 
 function getObjectsByPartialName(parent, partialName) {
   const results = [];
@@ -883,6 +846,14 @@ async function LoadLocationModel (url, locationData, isActive) {
                 model.userData.name = "model_" + Date.now();
                 model.userData.timestamp = Date.now();
             }
+            if (locationData.locationTags && (locationData.locationTags.includes("beat") || locationData.locationTags.includes("beatme"))) {
+                console.log("gotsa beatable!");
+                const options = {};
+                options.type = "uscale";
+                options.mesh = model;
+                const beatableModel = new Beatable(options);
+                beatables.push(beatableModel);
+            }
         // model.layers.set(1);
             model.userData.locationData = locationData;
             if (locationData.eventData.includes("instance")) {
@@ -990,7 +961,14 @@ async function LoadLocationModel (url, locationData, isActive) {
         // } 
         
         model.updateMatrixWorld(true);
-        
+        if (locationData.locationTags && (locationData.locationTags.includes("beat") || locationData.locationTags.includes("beatme"))) {
+            console.log("gotsa beatable!");
+            const options = {};
+            options.type = "uscale";
+            options.mesh = model;
+            const beatableModel = new Beatable(options);
+            beatables.push(beatableModel);
+        }
         if (locationData.locationTags && locationData.locationTags.includes("billboard")) {
             lookAtCameraObjects.push(model);
         }

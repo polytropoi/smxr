@@ -15,7 +15,7 @@ import { ActionSwitch, SetPlayerRigidbody, InstancedActionClick, sceneObjects } 
 
 import { activeObjex, allSceneObjex, groundObjex, navmesh, LocationEvent, playerPosition } from './wgpu_locations.js';
 
-import { scene, cameraMode, renderer, clock, selectedObjects, sceneIsReady } from './wgpu_main.mjs';
+import { scene, cameraMode, renderer, selectedObjects, sceneIsReady, timer } from './wgpu_main.mjs';
 
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
@@ -571,7 +571,7 @@ export function UpdateControls() {
         // }
     } else if (settings && controls && cameraMode == "Fly") {
         // controls.update(time);
-        const delta = clock.getDelta();
+        const delta = timer.getDelta();
 
         controls.update(delta);
         cameraWorldPosition.copy(camera.position);

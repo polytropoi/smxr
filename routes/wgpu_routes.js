@@ -1498,7 +1498,7 @@ wgpu_router.get('/:_id', function (req, res) {
                 }
             }
         }
-        console.log("availableScenes : " +JSON.stringify(availableScenes));
+        // console.log("availableScenes : " +JSON.stringify(availableScenes));
         if (availableScenes != null && availableScenes != undefined && availableScenes.length > 0) { //need it for random gates, etc...
             const buff = Buffer.from(JSON.stringify(availableScenesResponse)).toString("base64");
 

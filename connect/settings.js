@@ -1,5 +1,6 @@
 export let settings;
 
+export let sceneType;
 export let profile;
 
 export let pixelsPerMeterActual = 10; //pull from scene.settings instead...
@@ -11,6 +12,7 @@ export let mods = {locations: []};
 import { InitConnect, SetPlayerToLastPosition, localData } from "../connect/connect.js";
 import { InitSocket } from "../connect/socket.js";
 import { SettingsLoaded, LocalDataLoaded } from "./events.js";
+
 
 $(function() { 
 
@@ -25,6 +27,7 @@ $(function() {
    if (settings.sceneTags.includes("allow mods")) {
          localData.settings = settings;
    }
+   sceneType = settings.sceneType;
 
 });
 

@@ -1,4 +1,5 @@
-//loaded with landing pages, instead of connect.js, or landing.js (w/out aframe/three, with pixi refs)
+
+// could put all this in pixi_main, and use moar events to connect w/ the shared stuff... hrm
 
 import { GoWithIt, GoToMapLocation } from "../platforms/pixi/pixi_main.mjs"; //pixi fu here!@
 
@@ -6,14 +7,8 @@ import {settings, profile} from "./settings.js";
 
 import {localData, SetSceneLocations, GoToNext, GoToPrevious, poiLocations} from "./connect.js";
 
-import WaveSurfer from 'https://cdn.jsdelivr.net/npm/wavesurfer.js@7/dist/wavesurfer.esm.js';
-// import { Howl, Howler } from "howler";
+import WaveSurfer from 'https://cdn.jsdelivr.net/npm/wavesurfer.js@7/dist/wavesurfer.esm.js'; //todo pixi_media
 
-// import { Howl } from 'howler'
-
-// var sound = new Howl({
-// //   src: ['/static/sounds/clock.ogg']
-// });
 
 /////////////////// main onload function, populate settings, etc. and some client-side utils & modding functions
 export let room = window.location.pathname.split("/").pop(); //just the string after last slash (short code)

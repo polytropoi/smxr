@@ -1,6 +1,6 @@
     import * as THREE from 'three';
 
-    import {scene, clock} from './wgpu_main.mjs';
+    import {scene, timer} from './wgpu_main.mjs';
 
     import { navmesh, kinematicAgentMeshes } from './wgpu_locations.js';
 
@@ -1021,7 +1021,7 @@
                     // this.object.quaternion.slerp(this.targetQuaternion, 0.05);
                 } else {
                     
-                this.delta = clock.getDelta();
+                this.delta = timer.getDelta();
                     this.elapsedTime += this.delta;
 
                     // Calculate progress factor 't' between 0 and 1

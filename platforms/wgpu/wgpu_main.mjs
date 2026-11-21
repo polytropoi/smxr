@@ -96,7 +96,7 @@
 	let stats, pivot;
 	// let mixer, objects;
 	export let water;// waterLayer0, waterLayer1;
-	export let clock;
+	// export let clock;
 	export let renderer;
 	// let model, floor, floorPosition;
 	let postProcessing;
@@ -132,6 +132,10 @@
 	export let sceneIsReady = false;
 	
 	export let splatObjex = []; //InitSplats;
+
+	export const timer = new THREE.Timer();
+	// Optional: prevents massive delta jumps when switching browser tabs
+	timer.connect(document); 
 	
 	eventEl.addEventListener('ready-event', Start); //fired when settings are loaded..
 
@@ -410,21 +414,7 @@
 		if (settings.sceneGroups) {
 			console.log("settings.sceneGroups " + settings.sceneGroups.length);
 		}
-			// const texttest = "I have often wondered if the majority of mankind ever pause to reflect upon the occasionally titanic significance of dreams, and of the obscure world to which they belong. Whilst the greater number of our nocturnal visions are perhaps no more than faint and fantastic reflections of our waking experiences"
-			// ThreeText(texttest);
-		
-
-
-
-		// console.log("settings " + JSON.stringify(settings));
-
-		// scene.backgroundNode = normalWorld.y.mix( color( settings.sceneColor1 ), color( settings.sceneColor2 ) );
-
-
-		
-
-
-		clock = new THREE.Clock();
+			
 
 		if (settings.sceneTags.includes("hic")) {
 			SetUIMode("hic");// no workie now wtf!
@@ -784,12 +774,12 @@
 	function animate() {
 		const time = performance.now();
 		// scene.updateMatrixWorld(true);
-	if (clock && isReady) {
+	if (timer && isReady) {
 				
 
 			UpdateControls();
 
-			const delta = clock.getDelta();
+			const delta = timer.getDelta();
 			if (stats) {
 				stats.update();
 			}

@@ -2,7 +2,7 @@ import { settings } from "../connect/settings.js";
 
 import { MoveAvatarEvent } from "../connect/events.js";
 
-import { avatars, avatarName, localRoomUser,  room, RandomHexColor, socketHost, UpdatePlayerAvatars, ReturnRoomUsersString, token } from "../connect/connect.js"; //should be here...
+import { avatars, avatarName, localRoomUser,  room, RandomHexColor, socketHost, UpdatePlayerAvatars, ReturnRoomUsersString, token } from "../connect/connect.js"; //maybe should be here...
 
 export let socket = null; //the socket.io instance below
 
@@ -25,13 +25,13 @@ const rtcConfig = {
 
 // start();
 
-async function start() {
+async function peerVidStart() {
   // 1. Capture local media first
   localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
   localVideo.srcObject = localStream;
 
   // 2. Join the signaling room
-  socket.emit('join', ROOM);
+  socket.emit('join', room);
 }
 
 function createPeerConnection() {
@@ -352,10 +352,12 @@ if (settings && !socket) {
 
    });
 
+
+   //webrtc stuff below...
+
     // First peer receives 'ready' when second peer joins -> Initiates the call
-
-
-    // Handle incoming signaling messages from the other peer
+    // Handle incoming signaling messages from the other peer // what?
+    
     socket.on('signal', async (data) => {
     if (data.type === 'offer') {
         createPeerConnection();

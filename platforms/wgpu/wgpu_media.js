@@ -3,7 +3,7 @@ import * as THREE from 'three';
 // import * as Tone from 'tone';
 // import { Note, Scale } from "tonal";
 import { player, camera } from './wgpu_controls.js';
-import { scene } from './wgpu_main.mjs';
+import { scene, timer } from './wgpu_main.mjs';
 import { settings } from '../../../connect/settings.js';
 import { videoEl } from '../../../connect/connect.js';
 // import { eventEl } from '../../../connect/events.js';
@@ -41,10 +41,23 @@ export let mediaPlayersToUpdate = [];
 
 export let pictureGroupIndexes = {};
 
+export let beatables = [];
+
 const eventEl = document.getElementById("eventEl");
 export let webcamEl;// = document.createElement("video");
 
 eventEl.addEventListener('sequence-event', SequenceEvent); 
+
+eventEl.addEventListener('timed-event', onTimedEvent);
+
+export function onTimedEvent (event) {
+    console.log("timed event " + event.details);
+    if (event.details == "beat") {
+        beatables.forEach(element => {
+            element.triggerBeat();
+        });
+    }
+}
 
 export function SequenceEvent (event) {
     console.log("sequenceEvent " + JSON.stringify(event.details));
@@ -132,19 +145,7 @@ export function InitPictureGroups () {
             }
         }
     }
-    // const scenePicturesDataEl = document.getElementById('scenePicturesData');
-    // if (scenePicturesDataEl) {
-    // let theScenePicturesData = scenePicturesDataEl.getAttribute('data-scene-pictures');
-    //   scenePicturesData = JSON.parse(atob(theScenePicturesData));
-    //   console.log("scenePicturesData length " + scenePicturesData.length + " " + JSON.stringify(scenePicturesData));
-    //   for (let s = 0; s < scenePicturesData.length; s++) {
-    //     // if 
-    //         if (scenePicturesData[s].orientation == "Tileable") {
-    //              console.log("adding equirect: " +JSON.stringify(scenePicturesData[s]));
-    //             tileablePictures.push(scenePicturesData[s]);
-    //         }
-    //     }
-    // }
+    
    if (picPlaces.length) {
     for (let i = 0; i < picPlaces.length; i++) {
         const scenePic = new ScenePicture(picPlaces[i].groupID, null, picPlaces[i].instanceID, picPlaces[i].position, true, false, picPlaces[i].rotationQuaternion );
@@ -1383,4 +1384,38 @@ export async function getWebcamVideo(mesh, locationData) {
         }
     }
         
+}
+
+
+export class Beatable {
+    constructor(options){
+        console.log("new beatable " + options.mesh.name);
+        this.oScale = 1;
+        this.mesh = options.mesh;
+        this.targetScale = new THREE.Vector3(2, 2, 2);
+        this.alpha = 0;
+        this.beatMe = false;
+    }
+    triggerBeat () {
+        console.log("triggerBeat!")
+        this.beatMe = true;
+        this.update();
+    }
+    update () {
+
+        if (this.beatMe) {
+            console.log("tryna update a beatable!");
+            if (this.alpha == 1) {
+                this.beatMe = false;
+                this.mesh.scale.set(this.oScale,this.oScale,this.oScale);
+                this.alpha = 0;
+            } else {
+                this.alpha = 1 - Math.exp(-10 * timer.getDelta());
+                this.mesh.scale.lerp(this.targetScale, this.alpha);
+                this.update();
+            }
+        
+        }
+
+    }
 }

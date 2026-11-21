@@ -3,7 +3,7 @@ import { sceneLocations, GoToNext, GoToPrevious, videoEl, localData } from "../.
 import { primaryAudioEl, youtubeIsPlaying, primaryAudioHowl, MediaTimeUpdate, currentAudioFileName, fancyTimeFormat, updatePrimaryTransportSlider} from "../../connect/media.js";
 // import { StartPopup } from "../platforms/wgpu/wgpu_ui.js";
 import { LoadPrimaryAudioHowl } from "./media.js";
-import { settings } from "./settings.js";
+import { settings, sceneType } from "./settings.js";
 let timeKeysIndex = 0;
 let pauseLoops = false;
 let loopIntervals = [];
@@ -40,6 +40,8 @@ export let tkStarttimes = [];
 export let timedEventsListenerMode;
 let isListening = false;
 let lastTimedEvent = "";
+
+export let beatElements;
 
 // let currentPrimaryAudioTime = 0;
 ////////////////////////////////////// main method for timed events listening to all the things.../////////////////////////
@@ -325,7 +327,10 @@ function LoopTimedEvent(keyType, duration, keydata, keytags) {
    console.log("tryna LoopTimedEvent pausedLoops " + pauseLoops );
    duration = parseFloat(duration).toFixed(2) * 1000;
    console.log("tryna looop " + keyType  + " " +duration);
-   let beatElements = document.getElementsByClassName("beatme");
+   if (!beatElements) { 
+      beatElements = document.getElementsByClassName("beatme"); //aframe or plain html
+   }
+   
    let envEl = document.getElementById('enviroEl');
    let skyEl = document.getElementById('skyEl');
    
@@ -337,7 +342,8 @@ function LoopTimedEvent(keyType, duration, keydata, keytags) {
          } 
          if (keyType.toLowerCase().includes("beat")) {
             console.log("beat loop " + duration);
-            if (beatElements != null) {
+
+            if (sceneType == "aframe" && beatElements != null) {
                // console.log("beat objex " + beatElements.length)
                
             for (let i = 0; i < beatElements.length; i++) {
@@ -352,7 +358,11 @@ function LoopTimedEvent(keyType, duration, keydata, keytags) {
                      beatElements[i].components.mod_physics.randomPush();
                   }
                // }
-            }
+               }
+            } else {
+               console.log("tryna displatch loop beatz");
+               timed_event.details = "beat";
+               eventEl.dispatchEvent(timed_event);
             }
             if (envEl != null) {
                envEl.components.enviro_mods.beat(.5);
@@ -454,11 +464,13 @@ function LoopTimedEvent(keyType, duration, keydata, keytags) {
 
 function PlayTimedEvent(timeKey) {
    
-   if (lastTimedEvent.toString() == timeKey.toString()) {
+      console.log("timed event: " + JSON.stringify(timeKey) + " vs " + JSON.stringify(lastTimedEvent));
+   if (lastTimedEvent.keystarttime === timeKey.keystarttime && lastTimedEvent.keytype === timeKey.keytype) {
+      console.log("lastTimedEvent is the same as this timeKey!");
       return;
    }
    lastTimedEvent = timeKey;
-   console.log("tryna play timed event: " + JSON.stringify(timeKey));
+
 
    let duration = 1;
    if (timeKey.keyduration) {
@@ -500,11 +512,15 @@ function PlayTimedEvent(timeKey) {
          // console.log("beat volume " + volume);
          primaryAudioEl.components.primary_audio_control.timekey_beat(.5);
       } else {
-         // console.log("tryna displatch beatz");
-         // timed_event.details = {"beat"}
-         // eventEl.dispatchEvent(timed_event);
+         console.log("tryna displatch beatz");
+         timed_event.details = "beat";
+         eventEl.dispatchEvent(timed_event);
+
       }
-      let beatElements = document.getElementsByClassName("beatme");
+      if (!beatElements) { 
+         beatElements = document.getElementsByClassName("beatme"); //aframe or plain html
+      }
+      // let beatElements = document.getElementsByClassName("beatme");
       let envEl = document.getElementById('enviroEl');
       // let skyEl = document.getElementById('skyEl');
       console.log("beat loop " + duration);
