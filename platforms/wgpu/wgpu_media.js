@@ -1,7 +1,8 @@
 
 import * as THREE from 'three';
 
-import TWEEN from '@tweenjs/tween.js';
+import gsap from '/main/js/gsap/index.js';
+// import TWEEN from '@tweenjs/tween.js';
 // import * as Tone from 'tone';
 // import { Note, Scale } from "tonal";
 import { player, camera } from './wgpu_controls.js';
@@ -1397,6 +1398,7 @@ export class Beatable {
         this.targetScale = new THREE.Vector3(2, 2, 2);
         this.alpha = 0;
         this.beatMe = false;
+        this.useTween = false;
     }
     triggerBeat () {
         console.log("triggerBeat!")
@@ -1405,19 +1407,39 @@ export class Beatable {
         this.mesh.scale.set(1, 1, 1);
         // this.mesh.material.opacity = 1;
 
+        if (this.useTween) {
         const scaleUp = new TWEEN.Tween(this.mesh.scale)
-            .to({ x: 1.5, y: 1.5, z: 1.5 }, 250)
+            .to({ x: 1.5, y: 1.5, z: 1.5 }, 100)
             .easing(TWEEN.Easing.Quadratic.Out);
             // .repeat(1);
             // .start();
         const scaleDown = new TWEEN.Tween(this.mesh.scale)
-            .to({ x: 1, y: 1, z: 1 }, 250)
+            .to({ x: 1, y: 1, z: 1 }, 100)
             .easing(TWEEN.Easing.Quadratic.Out);
             // .repeat(1);
             // .start();
 
             scaleUp.chain(scaleDown);
             scaleUp.start();
+        }
+
+        gsap.to(this.mesh.scale, {
+            x: 1,
+            y: 1.2,
+            z: 1,
+            duration: 0.1,
+            ease: 'sine.inOut',
+            yoyo: true,
+            repeat: 1,
+            });
+
+        // gsap.to(this.mesh.material, {
+        //     opacity: 0.25,
+        //     duration: 0.9,
+        //     ease: 'sine.inOut',
+        //     yoyo: true,
+        //     repeat: 1,
+        //     });
         // new TWEEN.Tween(this.mesh.material)
         //     .to({ opacity: 0 }, 1200)
         //     .easing(TWEEN.Easing.Quadratic.Out)

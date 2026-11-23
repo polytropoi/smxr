@@ -9,7 +9,7 @@ import { settings } from '../../../connect/settings.js';
 
 import { scene } from './wgpu_main.mjs';
 
-import { sceneTextController, convertGltfToNodeMaterial } from './wgpu_media.js';
+import { sceneTextController, convertGltfToNodeMaterial, beatables, Beatable } from './wgpu_media.js';
 
 // import { surface } from './three_locations.js';
 
@@ -350,11 +350,14 @@ export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader
                 dummy.scale.set(scale, scale, scale);
 
             } else {
+                if (!scaleFactor) {
+                    scaleFactor = 1;
+                }
                 const iScale = ((Math.random()) * scaleFactor);
                 // const scale = 2;
                 // const iScale = scaleFactor;
                 dummy.scale.set(iScale, iScale, iScale);
-                // console.log("scaleFactor " + scaleFactor + " dummys cale is " +iScale);
+                console.log("scaleFactor " + scaleFactor + " dummys cale is " +iScale);
             }
             dummy.rotation.y = Math.random() * Math.PI * 2;
           
@@ -378,12 +381,14 @@ export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader
             for (let m = 0; m < instancedMeshes.length; m++) {
                 
                 if (surfaceType != "primitive") {
-                    // console.log("instance count " + i);
+                    
                     if (position.y > waterLevel)  {
+                        console.log("instance count above water level " + i);
                         instancedMeshes[m].setMatrixAt(i, dummy.matrix);
                         instancedMeshes[m].instanceMatrix.needsUpdate = true;
                     } else {
                         // dummy.scale.setScalar(0);
+                        console.log("hiding instance count " + i);
                         dummy.scale.set(0,0,0);
                         instancedMeshes[m].setMatrixAt(i, dummy.matrix);
                          instancedMeshes[m].instanceMatrix.needsUpdate = true;
@@ -398,12 +403,19 @@ export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader
        
         for (let s = 0; s < instancedMeshes.length; s++) {
           
-            
+            instancedMeshes[s].name = "iMesh_" + locData.name;
             if (locData.locationTags && locData.locationTags.includes("active")) {
                 activeObjex.push(instancedMeshes[s]);
                 instancedMeshes[s].userData.locationData = locData;
                 instancedMeshes[s].userData.name = locData.name;
 
+            }
+            if (locData.locationTags && locData.locationTags.includes("beat")) {
+                 const options = {};
+                options.type = "uscale";
+                options.mesh = instancedMeshes[s];
+                const beatable = new Beatable(options);
+                beatables.push(beatable);
             }
             if (locData.locationTags && locData.locationTags.includes("random color")) {
                 

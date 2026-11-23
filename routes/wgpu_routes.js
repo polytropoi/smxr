@@ -526,7 +526,7 @@ wgpu_router.get('/:_id', function (req, res) {
             importMapTemplate.imports["tsl-textures"] = "/platforms/wgpu/tsl/tsl-textures.js";
             importMapTemplate.imports["tonal"] = "https://esm.sh/tonal";
             // importMapTemplate.imports["@tweenjs/tween.js"] = "https://unpkg.com/browse/@tweenjs/tween.js@23.1.3/dist/tween.esm.js";
-            importMapTemplate.imports["@tweenjs/tween.js"] = "/main/js/tween.esm.js";
+            // importMapTemplate.imports["@tweenjs/tween.js"] = "/main/js/tween.esm.js";
 
             // "@tweenjs/tween.js": "/node_modules/@tweenjs/tween.js/dist/tween.esm.js"
 
