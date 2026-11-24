@@ -1551,7 +1551,7 @@ export function ReturnLocationTable () { //just show em all now!
    return "<table id=\x22locations\x22><th style=\x22color: black;\x22>Name</th><th style=\x22color: black;\x22>ID</th><th style=\x22color: black;\x22>Position</th><th style=\x22color: black;\x22>Asset</th><th style=\x22color: black;\x22>Type</th>"+tablerows+"</table>";
 }
 
-function LocationRowClick(data) {
+export function LocationRowClick(data) {
   
    console.log("location row click: " + data);
    ShowHideDialogPanel();

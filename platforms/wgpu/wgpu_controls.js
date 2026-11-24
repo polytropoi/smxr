@@ -5,7 +5,7 @@ import * as THREE from 'three';
 
 import { settings } from '../../../connect/settings.js';
 
-import { UpdatePlayerPosRot, avatars } from '../../../connect/connect.js';
+import { UpdatePlayerPosRot, avatars, LocationRowClick } from '../../../connect/connect.js';
 
 import { closestNavmeshPoint, navAgentInstances } from './wgpu_nav.js';
 
@@ -147,6 +147,7 @@ export function SetPlayerLocation (locationData) {
                 playerRigidbodySet = true;
             }
         }
+        InitTransformControls();
 
     // }
 }
@@ -1079,7 +1080,7 @@ async function RaycastHit(type, hit, event) {
             // lastRaycastHitPosition = hit.point;
             // console.log(type + " rayhit object type " + lastRaycastHitObject.userData.name + " " +  locationData.markerType + " desc  " + hit.object.name + " distance " + hit.distance + " scale " + locationData.yscale);
 
-            console.log(name + " raycasthit object type " + locationData.markerType + " " + hit.object.name );//.markerType + " desc  " + hit.object.name + " distance " + hit.distance);
+            console.log(name + " raycasthit object type " + locationData.markerType + " " + locationData.timestamp + " " + hit.object.name );//.markerType + " desc  " + hit.object.name + " distance " + hit.distance);
                     
 
             if (locationData.markerType == "trigger") { //hrm, triggers are for geo intersections
@@ -1486,7 +1487,7 @@ export function onMouseDown(event) { // on threejs object
     }
         // console.log("mouse down on " + event.target.id);
     if (lastRaycastHitObject && lastRaycastHitObject.userData.locationData) {
-        if (allowMods && keyIsDown == "KeyT") {
+        if (keyIsDown == "KeyT") {
             if (!lastRaycastHitObject.userData.isEquipped) {
                 if (lastRaycastHitObject.parent) {
                     transformControl.attach(lastRaycastHitObject.parent);
@@ -1496,8 +1497,13 @@ export function onMouseDown(event) { // on threejs object
 
                 return;
             }
+        } else if (keyIsDown === "ShiftLeft") {
+            if (lastRaycastHitObject.userData.locationData.timestamp) {
+                LocationRowClick(lastRaycastHitObject.userData.locationData.timestamp);
+            }
+            
         } else {
-            console.log("mouseDownOn " + event.target.id + " sceneObjectID " + lastRaycastHitObject.userData.sceneObjectID + " name " + lastRaycastHitObject.name); //+ " vs parent " + lastRaycastHitObject.parent.userData.sceneObjectID);
+            console.log("mouseDownOn locID " +lastRaycastHitObject.userData.locationData.timestamp + " event.target.id " +  event.target.id + " sceneObjectID " + lastRaycastHitObject.userData.sceneObjectID + " name " + lastRaycastHitObject.name); //+ " vs parent " + lastRaycastHitObject.parent.userData.sceneObjectID);
         }
     } else {
       

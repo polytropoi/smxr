@@ -659,7 +659,7 @@
                 
                 if (this.hasAnims) {
                         // this.action = 'walk';
-                    
+                    console.log("agent unpaused, tryna walk");
                     if (this.walkAnims.length) {
                         const randomIndex = Math.floor(Math.random() * this.walkAnims.length);
                         this.action = this.walkAnims[randomIndex];
@@ -1044,13 +1044,14 @@
         
         update(dt, currentTime){ //move it!
             const speed = this.speed;
-            // const agent = this.object; //um, not necessarily...
+            const agent = this.object; //um, not necessarily...
 
             let instancedPosition = new THREE.Vector3();
             let instancedQuaternion = new THREE.Quaternion();
             let instancedMatrix = new THREE.Matrix4();
             // console.log(currentTime + " " + lastTime + " " + throttleInterval);
             if (this.hasAnims) {
+                console.log(dt);
                 if (this.mixer) this.mixer.update(dt);
             }
             // if (this.isSlerping) {
@@ -1089,34 +1090,34 @@
                         // }
                     // }
 
-                    const vel = this.targetPosition.clone().sub(this.object.position);
+                    const vel = this.targetPosition.clone().sub(agent.position);
                     let pathLegComplete = (vel.lengthSq()<0.1);
   
                     if (!pathLegComplete) {
 
                         //Get the distance to the target before moving
-                        const prevDistanceSq = this.object.position.distanceToSquared(this.targetPosition);
+                        const prevDistanceSq = agent.position.distanceToSquared(this.targetPosition);
                        
                     
                         vel.normalize();
      
                         // if (this.isSlerping) {
                         //     if (this.targetQuaternion) {
-                        //         this.object.quaternion.slerp(this.targetQuaternion, 3);
+                        //         agent.quaternion.slerp(this.targetQuaternion, 3);
                             
                         //     }
                         // } else {
                             if (this.quaternion) {
-                                this.object.quaternion.slerp(this.quaternion, .1);
+                                agent.quaternion.slerp(this.quaternion, .1);
                             }
                         // }
 
-                        this.object.position.add(vel.multiplyScalar(dt * speed));
+                        agent.position.add(vel.multiplyScalar(dt * speed));
                                                     
                         //Get distance after moving, if greater then we've overshot and this leg is complete
-                        const newDistanceSq = this.object.position.distanceToSquared(this.targetPosition);
+                        const newDistanceSq = agent.position.distanceToSquared(this.targetPosition);
 
-                        // console.log("distance to target new/old " + newDistanceSq + " vs " + prevDistanceSq + " vel " + JSON.stringify(vel) + " speed " + speed + " dt " + dt);
+                        console.log("distance to target new/old " + newDistanceSq + " vs " + prevDistanceSq + " vel " + JSON.stringify(vel) + " speed " + speed + " dt " + dt);
                         
                         pathLegComplete = (newDistanceSq > prevDistanceSq);
                         // console.log(newDistanceSq + " vs " + prevDistanceSq);
@@ -1132,8 +1133,8 @@
                             if (instancedMesh) {
                             // console.log("tryna move agent with instanceIndex " + instanceIndex);
                                 
-                                instancedPosition.set(this.object.position.x, this.object.position.y, this.object.position.z);
-                                instancedQuaternion.set(this.object.quaternion.x, this.object.quaternion.y, this.object.quaternion.z, this.object.quaternion.w);
+                                instancedPosition.set(agent.position.x, agent.position.y, agent.position.z);
+                                instancedQuaternion.set(agent.quaternion.x, agent.quaternion.y, agent.quaternion.z, agent.quaternion.w);
                                 instancedMatrix.compose(instancedPosition, instancedQuaternion, new THREE.Vector3(this.scale, this.scale, this.scale));
                                 // console.log("instancedMatrix position " + instancedPosition + " scale " + this.scale );
                                 instancedAgentMeshes[timestamp].setMatrixAt(instanceIndex, instancedMatrix);
@@ -1145,7 +1146,7 @@
                         // }
 
                     } else if (pathLegComplete){
-                        // console.log("pathLegComplete!");
+                        console.log("pathLegComplete!");
                         // Remove node from the path we calculated
                         // console.log("pathLegComplete paths " + this.calculatedPath.length);
                         //  raypos = this.raycastedPosition(); //expensive, so throttle...
@@ -1194,10 +1195,10 @@
                 
                 camera.updateMatrixWorld(true);
                 camera.getWorldPosition(this.cameraWorldPosition);
-                this.object.lookAt(this.cameraWorldPosition);
-                this.object.lookAt(player.position);
-                this.object.rotation.x = 0;
-                this.object.rotation.z = 0;
+                agent.lookAt(this.cameraWorldPosition);
+                agent.lookAt(player.position);
+                agent.rotation.x = 0;
+                agent.rotation.z = 0;
                 this.targetPosition = null;
                 this.calculatedPath = [];
                //? 

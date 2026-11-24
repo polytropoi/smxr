@@ -357,7 +357,7 @@ export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader
                 // const scale = 2;
                 // const iScale = scaleFactor;
                 dummy.scale.set(iScale, iScale, iScale);
-                console.log("scaleFactor " + scaleFactor + " dummys cale is " +iScale);
+                // console.log("scaleFactor " + scaleFactor + " dummyscale is " +iScale);
             }
             dummy.rotation.y = Math.random() * Math.PI * 2;
           
@@ -383,7 +383,7 @@ export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader
                 if (surfaceType != "primitive") {
                     
                     if (position.y > waterLevel)  {
-                        console.log("instance count above water level " + i);
+                        // console.log("instance count above water level " + i);
                         instancedMeshes[m].setMatrixAt(i, dummy.matrix);
                         instancedMeshes[m].instanceMatrix.needsUpdate = true;
                     } else {

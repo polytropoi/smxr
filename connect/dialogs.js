@@ -17,6 +17,7 @@ import { hasLocalData, SaveLocalData, ConvertAndSaveLocalFile, InitLocalFiles, D
 import { stringRoomUsers } from "../connect/socket.js";
 
 let eventEl = document.getElementById("eventEl");
+
 export let showDialogPanel = false;
 let dialogInitialized = false;
 

@@ -778,7 +778,7 @@
 		// scene.updateMatrixWorld(true);
 	if (timer && isReady) {
 				
-
+			timer.update(time);
 			UpdateControls();
 
 			const delta = timer.getDelta();
