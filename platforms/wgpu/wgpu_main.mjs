@@ -1,6 +1,6 @@
 	import * as THREE from 'three/webgpu';
 	
-	import TWEEN from '@tweenjs/tween.js';
+	// import TWEEN from '@tweenjs/tween.js';
 
 	import { color, objectPosition, screenUV, 
 		uniform, vec2, pass } from 'three/tsl';
@@ -809,7 +809,7 @@
 			// beatables.forEach(a => 
 			// 	a.update(delta));
 
-			TWEEN.update();
+			// TWEEN.update();
 
 			if (rapierDebugRenderer && showDebug) {
 				rapierDebugRenderer.update();
