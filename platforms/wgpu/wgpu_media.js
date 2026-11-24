@@ -1427,7 +1427,7 @@ export class Beatable {
             x: 1,
             y: 1.2,
             z: 1,
-            duration: 0.1,
+            duration: 0.2,
             ease: 'sine.inOut',
             yoyo: true,
             repeat: 1,

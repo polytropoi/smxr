@@ -101,7 +101,7 @@ let skyColor = color(settings.sceneColor1);
 let groundColor = color(settings.sceneColor2);
 
 	// const skyColor = color(settings.sceneColor1);
-	const pulseFactor = sin(time.mul(2.0)).mul(0.5).add(0.5);
+	const pulseFactor = sin(time.mul(2.0)).mul(0.05).add(0.05);
 	const color1 = color(settings.sceneColor2).rgb; // converts to vec3
 	const color2 = color(settings.sceneColor2Alt).rgb;
 	// const colorB = vec3(0.0, 0.0, 1.0); // Blue
@@ -123,8 +123,8 @@ let groundColor = color(settings.sceneColor2);
 	// a alternative way to create a TimerNode
 	const timer = uniform(0).onFrameUpdate((frame) => frame.time); //nice
 
-	const fogNoiseA = triNoise3D(positionWorld.mul(.005), 0.2, timer);
-	const fogNoiseB = triNoise3D(positionWorld.mul(.01), 0.2, timer.mul(1.2));
+	const fogNoiseA = triNoise3D(positionWorld.mul(.005), 0.2, timer.mul(2));
+	const fogNoiseB = triNoise3D(positionWorld.mul(.01), 0.2, timer.mul(3));
 
 	const fogNoise = fogNoiseA.add(fogNoiseB).mul(groundColor);
 
@@ -557,7 +557,7 @@ export async function InitGround(options) {
 		}
 		const width = x;
 		const height = y;
-		const segments = 128; 
+		const segments = 125; 
 		const geometry = new THREE.PlaneGeometry(width, height, segments, segments);
 
 		// Rotate to make it horizontal (flat terrain)
@@ -566,7 +566,7 @@ export async function InitGround(options) {
 		// Access the position attribute
 		const positionAttr = geometry.attributes.position;
 		const perlin = new ImprovedNoise();
-		const peakHeight = 6; // Maximum height of hills
+		const peakHeight = 20; // Maximum height of hills
 		const noiseScale = 100;
 
 		for (let i = 0; i < positionAttr.count; i++) {
@@ -575,7 +575,7 @@ export async function InitGround(options) {
 			const z = positionAttr.getZ(i);
 
 			// Calculate noise value based on coordinates (scale inputs for smooth hills)
-			const y = perlin.noise(x * .03, 0, z * .03) * peakHeight * (Math.random() / 3);
+			const y = perlin.noise(x * .05, 0, z * .05) * peakHeight * (Math.random() / 5);
 
 			// Update the Y (height) coordinate
 			positionAttr.setY(i, y);

@@ -1855,7 +1855,7 @@ wgpu_router.get('/:_id', function (req, res) {
                             "src: [\x22"+primary_oggurl+"\x22,\x22"+primary_mp3url+"\x22], "+html5+" ctx: true, volume: 1," + loopable +
                         "});" +
                     "primaryAudioHowl.load();</script>";
-                    primaryAudioEntity = "<div id=\x22primaryAudioParent\x22></div>"; //parent, no window click
+                    primaryAudioEntity = "<div id=\x22primaryAudioParent\x22 data-primaryaudiotitle=\x22"+primaryAudioTitle+"\x22></div>"; //parent, no window click
                     
                     // "<div gltf-model=\x22#backpanel_horiz1\x22 position=\x220 0 0\x22 material=\x22color: black; transparent: true;\x22></div>" +
                     // "<div position=\x220 -1.25 0\x22 primary_audio_player id=\x22primaryAudioPlayer\x22 gltf-model=\x22#audioplayer\x22></div>"+

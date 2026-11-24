@@ -790,8 +790,10 @@ async function LoadLocationModel (url, locationData, isActive) {
             const geometry = new THREE.SphereGeometry(yscale,16,16);
             // const material = new THREE.NodeMaterial();
             const material = new THREE.MeshStandardNodeMaterial({
-                metalness: 1.0,
-                roughness: 0.1
+                metalness: 0.5,
+                roughness: 0.25,
+                transparent: true,
+                opacity:.5
             });
             // material.colorNode = range(new THREE.Color(0x000000), new THREE.Color(0xffffff));
             // material.colorNode = color(0xffffff);
@@ -865,59 +867,31 @@ async function LoadLocationModel (url, locationData, isActive) {
                 instancedModel.scale = yscale;
                 instancedModel.castShadow = true;
                 instancedModel.receiveShadow = true;
-                // instancedModel.material = convertGltfToNodeMaterial(instancedModel.material);
-                // instancedModel.count = count;
-                // if (locationData[i].objectID) { // add object data if present  
-                //     for (let o = 0; o < objexData.length; o++) { //spin through imported models to match
-                //         if (locationData[i].objectID == objexData[o]._id) {
-                //             locationData[i].objectData = objexData[o];
-                //         }
-                //     }
-                // }
+
                 instancedModels.push(instancedModel);
                 console.log("instancedModels length " + instancedModels.length);
             }
-            // if (locationData.eventData.includes("instance")) {
-            //     console.log("gotsa primitive instance!");
-            //     let count, scale, yMod, shader;
-            //     if (locationData.eventData.includes("~")) {
-            //         let countSplit = locationData.eventData.split("~");
-            //         count = countSplit[1];
-            //     } else {
-            //         if (locationData.eventData.includes("grass")) {
-            //             count = 100;
-            //         }
-            //         if (locationData.eventData.includes("rocks")) {
-            //             count = 100;
-            //         }
-            //     }	
-
-            //     if (locationData.yscale) {
-            //         scale = locationData.yscale;
-            //     } else {
-            //         scale = 1;
-            //     }
-
-            //     if (locationData.y != 0) {
-            //         yMod = locationData.y;
-            //     }
-                
-            //     if (locationData.locationTags.includes("wind")) {
-            //         shader = "wind";
-            //     } 
-            //     // if (locationData.mediaID && locationData.mediaID != "" && locationData.mediaID != "none") {
-            //     //     InstanceOnSurface(model, count, scale, yMod, shader, locationData);
-            //     // } else {
-            //         InstanceOnSurface(model, count, scale, yMod, shader, locationData);
-                        
-            //     // }
-            // }
+            
         }
     } else { 
         console.log("tryna fetch model " + url)
         const gltf = await LoadModel(url);
         model = gltf.scene;
         animations = gltf.animations;
+        model.userData.locationData = locationData;
+        if (locationData.eventData.includes("instance")) {
+            let instancedModel = {};
+
+            instancedModel.model = model;
+            instancedModel.locationData = locationData;
+            instancedModel.modelData = null;
+            instancedModel.scale = yscale;
+            instancedModel.castShadow = true;
+            instancedModel.receiveShadow = true;
+
+            instancedModels.push(instancedModel);
+            console.log("instancedModels length " + instancedModels.length);
+        }
 
     }
 
@@ -1322,6 +1296,24 @@ async function CreateDefaultLocationMarker(locationData) { //use default model o
         break;
 
         case "video":
+
+        if (locationData.modelID && locationData.modelID.includes("primitive")) {
+            model = await LoadLocationModel(null, locationData, true);
+        } else {
+            model = await LoadLocationModel('https://servicemedia.s3.amazonaws.com/assets/models/poi1b.glb', locationData, true);
+            // locationData.modelID = "primitive_sphere";
+            // model = await LoadLocationModel(null, locationData, true);
+            // model.material.wireframe = true;
+            // model.material.color = "yellow";
+        }
+         if (model) {
+            scene.add(model.model);
+          
+            console.log("adding a primitive character mesh! " + model.name);
+        }
+        break;
+
+        case "character":
 
         if (locationData.modelID && locationData.modelID.includes("primitive")) {
             model = await LoadLocationModel(null, locationData, true);

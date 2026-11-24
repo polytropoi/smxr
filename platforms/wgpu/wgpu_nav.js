@@ -182,8 +182,8 @@
             name: name,
             npc: true,
             animations: animations,
-            snapToGround: snapToGround
-            // yOffset: locationData.y
+            snapToGround: snapToGround,
+            yOffset: locationData.y
         };
 
         const npc = new NavAgent( options );
@@ -191,7 +191,7 @@
         // ThreeDeeText(name, 1, model, null, null, false, null);
         // HTMLText(name, 1, model, null, null, false, null);
                 const agentID = locationData.timestamp + "_" + index;
-        console.log("creating npc navagent name " + model.userData.name + " vs agentID " + agentID + " vs sceneObjectID " + sceneObjectID + " scale " + scale);
+        // console.log("creating npc navagent name " + model.userData.name + " vs agentID " + agentID + " vs sceneObjectID " + sceneObjectID + " scale " + scale);
 
 
         navAgentInstances[sceneObjectID] = npc;
@@ -408,7 +408,7 @@
             this.playerNavMode = false;
 
 
-            const clock = new THREE.Clock();
+            // const clock = new THREE.Clock();
             this.duration = .1; // animation duration in seconds
             this.elapsedTime = 0;
             this.isSplerping = false;
@@ -468,6 +468,7 @@
             // }
             this.snapToGround();
         }
+
         raycastedPosition() {
             //    let raycaster = new THREE.Raycaster();
             if (!this.downcaster) {
@@ -529,19 +530,19 @@
         
         newPath(pt) {
 
-            // const player = this.object;
+        // const player = this.object;
 
-            
-            // if (this.name == "player") {
-                console.log("tryna get path to " + JSON.stringify(pt));
-            // }
-            
-            if (this.pathfinder===undefined) {
-                console.log("no pathfinder!");
-                this.calculatedPath = [ pt.clone() ];
-                this.setTargetDirection();
-                return;
-            }
+        
+        // if (this.name == "player") {
+            console.log("tryna get path to " + JSON.stringify(pt));
+        // }
+        
+        if (this.pathfinder===undefined) {
+            console.log("no pathfinder!");
+            this.calculatedPath = [ pt.clone() ];
+            this.setTargetDirection();
+            return;
+        }
             // if (!this.readyToNav) {
             //     return;
             // }
@@ -780,8 +781,6 @@
 
                 // 3. Extract the quaternion from that matrix
 
-
-
                 // const timestamp = this.sceneObjectID.split("_")[0];
                 // const instanceIndex = this.sceneObjectID.split("_")[1];
                 // const instancedMesh = instancedAgentMeshes[timestamp];
@@ -843,17 +842,7 @@
                     this.object.rotation.z = 0;
             }
           
-                    // if (this.readyToNav) {
-                    //         this.object.traverse((child) => {
-                    //         if (child.isMesh) {
-                    //            child.material.color
-                    //         }
-                    //         });
-                    // }
-            //     } else {
-            //         console.log("don't interrupt now, cain't find a spot to stop");
-            //     }
-            // }
+
         }
 
         resetAgent_() {
@@ -988,7 +977,7 @@
             }
             const raypos = this.raycastedPosition(); //expensive, so throttle...
             if (raypos && raypos.y) {
-                console.log("raypos Y " + raypos.y);
+                console.log("distance to ground " + raypos.y);
                 this.object.position.y = raypos.y;
             }
         }
@@ -1117,7 +1106,7 @@
                         //Get distance after moving, if greater then we've overshot and this leg is complete
                         const newDistanceSq = agent.position.distanceToSquared(this.targetPosition);
 
-                        console.log("distance to target new/old " + newDistanceSq + " vs " + prevDistanceSq + " vel " + JSON.stringify(vel) + " speed " + speed + " dt " + dt);
+                        // console.log("distance to target new/old " + newDistanceSq + " vs " + prevDistanceSq + " vel " + JSON.stringify(vel) + " speed " + speed + " dt " + dt);
                         
                         pathLegComplete = (newDistanceSq > prevDistanceSq);
                         // console.log(newDistanceSq + " vs " + prevDistanceSq);
@@ -1146,7 +1135,7 @@
                         // }
 
                     } else if (pathLegComplete){
-                        console.log("pathLegComplete!");
+                        // console.log("pathLegComplete!");
                         // Remove node from the path we calculated
                         // console.log("pathLegComplete paths " + this.calculatedPath.length);
                         //  raypos = this.raycastedPosition(); //expensive, so throttle...

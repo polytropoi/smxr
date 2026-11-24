@@ -622,7 +622,7 @@ export async function PrimaryAudioIsPlaying () {
 export function LoadPrimaryAudioHowl () {
   if (!primaryAudioHowl) {
       primaryAudioHowl = globalThis.primaryAudioHowl; //for aframe, howl don't module
-    console.log("primaryAudioHowl is global!");
+      console.log("primaryAudioHowl is global!");
     }
 
   if (!primaryAudioHowl && settings && settings.primary_mp3url) {

@@ -214,7 +214,7 @@ export async function ReturnTagForInstance (locID, instanceID) { //instances can
 export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader, locData, instanceTags) { //hrm, should be a class?
 
     await sampler;
-    console.log("TRYNA INSTANCE ON SURFACE " + model.name + " count " + count+ " mediaID " + locData.mediaID + " yMod " + yMod);
+    console.log("TRYNA INSTANCE ON SURFACE " + locData.name + " count " + count+ " mediaID " + locData.mediaID + " yMod " + yMod);
 
     let instanceTagData;
     let usedPositions = [];
@@ -373,7 +373,11 @@ export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader
                 // const z = 1;
                 await navmesh != null;
                 await pathfinding != null;
-                await CreateNPCAgent(true, null, animations, i.toString(), locData, locData.objectData, sceneObjectID, scale);
+                if (navmesh && pathfinding) {
+                    // console.log("tryna instance a navagent...");
+                    await CreateNPCAgent(true, null, animations, i.toString(), locData, locData.objectData, sceneObjectID, scale);
+                
+                }
                
                 // kinematicAgentMeshes.push(physicsColliderMesh); //load later after settledown
             }
