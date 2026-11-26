@@ -1,19 +1,12 @@
-
-
 import { SaveLocalData, DeleteLocalSceneData, SetHasLocalData, InitIDB, UpdateLocalPlayerState } from "../connect/indexedDb.js";
-
-
 import { SetSelectedLocationTimestamp, ShowHideDialogPanel, sceneObjects, SceneManglerModal } from "./dialogs.js";
 import { SetTimedEventsListenerMode, timeKeysData, SetTimeKeysData, SetPrimaryAudioEventsData, SetVideoEventsData, 
    selectedPosition, MapUpdate, SequenceEvent, CreateAvatarEvent, DeleteAvatarEvent, MoveAvatarEvent, 
-   UpdateRoomUsers} from "../connect/events.js";
-
+   UpdateRoomUsers, timed_event} from "../connect/events.js";
 
 import { settings, profile, mods } from "../connect/settings.js";
 
-
 import { socket, mySocketID, roomUsers, stringRoomUsers } from "../connect/socket.js";
-
 
 /////////////////// main onload function, populate settings, etc. and some client-side utils & modding functions
 export let room = window.location.pathname.split("/").pop(); //just the string after last slash (short code)
@@ -34,6 +27,8 @@ export var videoEl = null;
 export const sceneEl = document.querySelector('a-scene'); //related to problem...
 // export let hasLocalData = false;
 export const lerp = (x, y, a) => x * (1 - a) + y * a;
+
+let eventEl = document.getElementById("eventEl");
 
 var dateString = Date.now().toString();
 // export let roomUsers = {};
@@ -1301,7 +1296,7 @@ export function GoToNext() {
     
    // } else if ((settings.sceneType.toLowerCase() == "aframe" || settings.sceneType.toLowerCase() == "default") && settings.hasBgMap) { 
       
-   } else {
+   } else if (settings.sceneType == "aframe") {
      
          let curveDriver = document.getElementById("cameraCurve");
          if (curveDriver && settings && timedEventsListenerMode ) {
@@ -1387,6 +1382,19 @@ export function GoToNext() {
          // EmitSelfPosition();
       }
          
+   } else {
+
+      console.log("tryna GoToNext");
+
+         // const eventDetails = {};
+         // eventDetails.keytype = "Next";
+         // eventDetails.keyduration = 3;
+         // timed_event.details = eventDetails;
+
+         // // timed_event.details.keydata = keydata;
+         // // timed_event.details.keytags = keytags;
+
+         // eventEl.dispatchEvent(timed_event);
    }
 }
 // }
@@ -1756,8 +1764,8 @@ export function CreateLocationAframe (filename, type, position) { //AFRAME New L
 
    sceneEl.appendChild(phEl);
 
-   let nextbuttonEl = document.getElementById('nextButton');
-   let prevbuttonEl = document.getElementById('previousButton');
+   let nextbuttonEl = document.getElementById('next_Button');
+   let prevbuttonEl = document.getElementById('previous_Button');
    nextbuttonEl.style.visibility = "visible";
    prevbuttonEl.style.visibility = "visible";
 

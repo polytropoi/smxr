@@ -4112,9 +4112,9 @@ aframe_router.get('/:_id', function (req, res) {
                         audioSliders +
                         mapOverlay + 
                         adSquareOverlay +
-                        "<div class=\x22next-button\x22 id=\x22nextButton\x22 style=\x22visibility: hidden\x22 ><i class=\x22fas fa-arrow-circle-right fa-2x\x22></i></div>"+
-                        "<div class=\x22footer-text\x22 id=\x22footerText\x22></div>"+
-                        "<div class=\x22previous-button\x22 id=\x22previousButton\x22 style=\x22visibility: hidden\x22 ><i class=\x22fas fa-arrow-circle-left fa-2x\x22></i></div>"+
+                        "<div class=\x22next_button\x22 id=\x22nextButton\x22 style=\x22visibility: hidden\x22 ><i class=\x22fas fa-arrow-circle-right fa-2x\x22></i></div>"+
+                        "<div class=\x22footer_text\x22 id=\x22footerText\x22></div>"+
+                        "<div class=\x22previous_button\x22 id=\x22previousButton\x22 style=\x22visibility: hidden\x22 ><i class=\x22fas fa-arrow-circle-left fa-2x\x22></i></div>"+
                         "<a href=\x22''\x22 target=\x22_blank\x22 class=\x22ar-buttoon\x22>AR</a>" + //?
                         "<div id=\x22token\x22 data-token=\x22"+token+"\x22></div>\n"+
                         locationButton+

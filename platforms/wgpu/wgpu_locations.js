@@ -1191,6 +1191,11 @@ async function CreateDefaultLocationMarker(locationData) { //use default model o
         break;
 
         case "poi":
+
+        let nextbuttonEl = document.getElementById('next_Button');
+        let prevbuttonEl = document.getElementById('previous_Button');
+        nextbuttonEl.style.visibility = "visible";
+        prevbuttonEl.style.visibility = "visible";
             
         if (locationData.modelID &&locationData.modelID.includes("primitive")) {
             model = await LoadLocationModel(null, locationData, true);

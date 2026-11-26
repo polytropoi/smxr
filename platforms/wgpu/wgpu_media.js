@@ -22,6 +22,7 @@ import { UpdateEnvMap } from './wgpu_environment.js';
 import { pauseVideo, playVideo } from '../../connect/media.js';
 import { picPlaces, playerPosition } from './wgpu_locations.js';
 import { Quaternion } from 'three';
+import { GoToNext } from '../../connect/connect.js';
 
 
 export let primaryAudioGroups;
@@ -54,12 +55,19 @@ eventEl.addEventListener('sequence-event', SequenceEvent);
 eventEl.addEventListener('timed-event', onTimedEvent);
 
 export function onTimedEvent (event) {
-    console.log("timed event " + event.details);
-    if (event.details == "beat") {
+    console.log("received timed event " + JSON.stringify(event.details));
+    if (event.details.keytype == "Beat") {
         beatables.forEach(element => {
             element.triggerBeat();
         });
     }
+    if (event.details.keytype == "Player Lerp") {
+        Animations(event.details.keytype);
+    }
+    if (event.details.keytype == "Next") {
+        GoToNext();
+    }
+
 }
 
 export function SequenceEvent (event) {
@@ -1390,6 +1398,30 @@ export async function getWebcamVideo(mesh, locationData) {
 }
 
 
+export function Animations (type, source, target, startpos, endpos) {
+
+    console.log("Animations " + type);
+    switch (type) {
+    
+    case "Player Lerp":
+        console.log("trynn do camera move!");
+        if (!target) {
+            target = new THREE.Vector3(0, 3, -10);
+        }
+            gsap.to(player.position, {
+            x: 5,
+            y: 10,
+            z: 15,
+            duration: 5,
+            ease: "sine.inOut",
+            onUpdate: () => {
+                camera.lookAt(target);
+            },
+        });
+        break;
+    }
+}
+
 export class Beatable {
     constructor(options){
         console.log("new beatable " + options.mesh.name);
@@ -1447,6 +1479,22 @@ export class Beatable {
         //     .start();
         // this.update();
     }
+    // cameraMove (position, duration, lookTarget) {
+
+    //     const target = new THREE.Vector3(0, 1, 0);
+
+    //             gsap.to(camera.position, {
+    //             x: 5,
+    //             y: 3,
+    //             z: 8,
+    //             duration: 1.5,
+    //             ease: "power3.inOut",
+    //             onUpdate: () => {
+    //                 camera.lookAt(target);
+    //             },
+    //     });
+
+    // }
     update (delta) {
 
         if (this.beatMe) {

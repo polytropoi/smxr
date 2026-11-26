@@ -9,7 +9,6 @@ let pauseLoops = false;
 let loopIntervals = [];
 let eventTriggersSet = false;
 
-let timed_event = new Event("timed-event"); //good old timedEvents from db
 let map_update = new Event("map-update"); //as in vtt map
 let audio_viz = new Event("audio-viz"); //calling all audio actives
 let ready_event = new Event("ready-event"); //settings and data ready, init the things
@@ -20,6 +19,8 @@ export let sequence_event = new Event("sequence-event");
 export let data_event = new Event("data-event");
 export let location_event = new Event("location-event");
 export let avatar_event = new Event("avatar-event");
+
+export let timed_event = new Event("timed-event"); //good old timedEvents
 
 export let sequenceInt = -1;
 
@@ -336,6 +337,15 @@ function LoopTimedEvent(keyType, duration, keydata, keytags) {
    
    let theInterval = setInterval(function () {
       if (!pauseLoops) {
+
+         console.log("tryna displatch looped timed_event " + keyType);
+         timed_event.details.keytype = keyType;
+         timed_event.details.keyduration = duration;
+         timed_event.details.keydata = keydata;
+         timed_event.details.keytags = keytags;
+
+         eventEl.dispatchEvent(timed_event);
+
          if (keyType == "Next") {
             console.log("next loop " + duration);
             GoToNext();
@@ -346,7 +356,7 @@ function LoopTimedEvent(keyType, duration, keydata, keytags) {
             if (sceneType == "aframe" && beatElements != null) {
                // console.log("beat objex " + beatElements.length)
                
-            for (let i = 0; i < beatElements.length; i++) {
+               for (let i = 0; i < beatElements.length; i++) {
                // if (Math.random() > .5) { //hrm, toggle how?
                   if (beatElements[i].components.mod_model != undefined) {
                      beatElements[i].components.mod_model.beat(.75, duration);
@@ -360,9 +370,7 @@ function LoopTimedEvent(keyType, duration, keydata, keytags) {
                // }
                }
             } else {
-               console.log("tryna displatch loop beatz");
-               timed_event.details = "beat";
-               eventEl.dispatchEvent(timed_event);
+             
             }
             if (envEl != null) {
                envEl.components.enviro_mods.beat(.5);
@@ -464,7 +472,7 @@ function LoopTimedEvent(keyType, duration, keydata, keytags) {
 
 function PlayTimedEvent(timeKey) {
    
-      console.log("timed event: " + JSON.stringify(timeKey) + " vs " + JSON.stringify(lastTimedEvent));
+      console.log("PlayTimedEvent timekey: " + JSON.stringify(timeKey));
    if (lastTimedEvent.keystarttime === timeKey.keystarttime && lastTimedEvent.keytype === timeKey.keytype) {
       console.log("lastTimedEvent is the same as this timeKey!");
       return;
@@ -478,8 +486,7 @@ function PlayTimedEvent(timeKey) {
    }
 
          // console.log("tryna displatch beatz");
-      timed_event.details = timeKey;
-      eventEl.dispatchEvent(timed_event);
+
 
    let posObj = {};
    let rotObj = {};
@@ -496,7 +503,12 @@ function PlayTimedEvent(timeKey) {
             envEl.components.enviro_mods.colorlerp(duration); //does loop on arg
          }
       }
+   } else {
+      timed_event.details = timeKey;
+      eventEl.dispatchEvent(timed_event);
    }
+
+
    if (timeKey.keytype.toLowerCase().includes("Player Follow Path")) {
       let curveDriver = document.getElementById("cameraCurve");
       if (curveDriver && settings && timedEventsListenerMode ) {
@@ -512,9 +524,9 @@ function PlayTimedEvent(timeKey) {
          // console.log("beat volume " + volume);
          primaryAudioEl.components.primary_audio_control.timekey_beat(.5);
       } else {
-         console.log("tryna displatch beatz");
-         timed_event.details = "beat";
-         eventEl.dispatchEvent(timed_event);
+         // console.log("tryna displatch beatz");
+         // timed_event.details.type = "beat";
+         // eventEl.dispatchEvent(timed_event);
 
       }
       if (!beatElements) { 
@@ -697,25 +709,30 @@ function PlayTimedEvent(timeKey) {
       }
    } 
    if (timeKey.keytype == "Player Lerp") {
-      console.log("trynba lerp to " + timeKey.keydata.toString());
-      let tkElID = document.getElementById(timeKey.keydata.toString());
-      // duration = timeKey.keyduration;
-      if (tkElID) {
-         posObj = tkElID.getAttribute("position");
-         player.components.player_mover.move('player', posObj, rotObj, timeKey.keyduration, "#" +CSS.escape(timeKey.keydata.toString())); // bc ids aren't supporsed to have leading number! ok then...
-      } else {
-         console.log("caint find timeKey.keyData el " + timeKey.keydata);
-         for (let s = 0; s < sceneLocations.locations.length; s++) {
-            if (timeKey.keydata.toString() == sceneLocations.locations[s].name) {
-               tkElID = document.getElementById(sceneLocations.locations[s].timestamp);
-               if (tkElID) {
-                  posObj = tkElID.getAttribute("position");
-                  player.components.player_mover.move('player', posObj, rotObj, timeKey.keyduration, "#" +CSS.escape(timeKey.keydata.toString())); // bc ids aren't supporsed to have leading number! ok then...
+      if (sceneType == "aframe") {
+         console.log("trynba lerp to " + timeKey.keydata.toString());
+         let tkElID = document.getElementById(timeKey.keydata.toString());
+         // duration = timeKey.keyduration;
+         if (tkElID) {
+            posObj = tkElID.getAttribute("position");
+            player.components.player_mover.move('player', posObj, rotObj, timeKey.keyduration, "#" +CSS.escape(timeKey.keydata.toString())); // bc ids aren't supporsed to have leading number! ok then...
+         } else {
+            console.log("caint find timeKey.keyData el " + timeKey.keydata);
+            for (let s = 0; s < sceneLocations.locations.length; s++) {
+               if (timeKey.keydata.toString() == sceneLocations.locations[s].name) {
+                  tkElID = document.getElementById(sceneLocations.locations[s].timestamp);
+                  if (tkElID) {
+                     posObj = tkElID.getAttribute("position");
+                     player.components.player_mover.move('player', posObj, rotObj, timeKey.keyduration, "#" +CSS.escape(timeKey.keydata.toString())); // bc ids aren't supporsed to have leading number! ok then...
+                  }
                }
             }
          }
-      }
-   } 
+      } else {
+         // timed_event.details.type = timeKey.keytype;
+         // eventEl.dispatchEvent(timed_event);
+      } 
+   }
 }
 
 

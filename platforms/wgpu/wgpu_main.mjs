@@ -78,6 +78,7 @@
 		 
 	
 	import { InitSuperSonic, SynthHit, synthKeys, SynthKeys, superSonicLoaded, synthTransports } from './wgpu_synths.js';
+import { GoToNext, GoToPrevious } from '../../connect/connect.js';
 
 	// import QuadMesh from 'three/addons/objects/QuadMesh.js';
 
@@ -1040,6 +1041,14 @@
 		// document.addEventListener('mousemove', onMouseMove);
 		document.addEventListener('pointermove', onMouseMove);
 
+		$('#next_Button').on('click', function(e) {
+			GoToNext();
+		   
+		});
+		$('#previous_Button').on('click', function(e) {
+			GoToPrevious();
+		});
+		
 		
 
 	} //end init events

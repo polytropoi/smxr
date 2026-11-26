@@ -1040,7 +1040,7 @@
             let instancedMatrix = new THREE.Matrix4();
             // console.log(currentTime + " " + lastTime + " " + throttleInterval);
             if (this.hasAnims) {
-                console.log(dt);
+                // console.log(dt);
                 if (this.mixer) this.mixer.update(dt);
             }
             // if (this.isSlerping) {

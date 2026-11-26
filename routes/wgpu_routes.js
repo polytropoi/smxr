@@ -2862,7 +2862,6 @@ wgpu_router.get('/:_id', function (req, res) {
                             canvasOverlay +
                             "<div id=\x22theModal\x22 class=\x22modal\x22><div id=\x22modalContent\x22 class=\x22modal-content\x22></div></div>" +
                         
-
                             "<div class=\x22avatarName\x22 id="+avatarName+"></div>"+
                             "<div id=\x22token\x22 data-token=\x22"+token+"\x22></div>\n"+
                             settingsData +
@@ -2893,7 +2892,20 @@ wgpu_router.get('/:_id', function (req, res) {
                             
                             "<div id=\x22hic_content\x22 class=\x22hic_content_trans\x22></div>" +
                             "<div id=\x22eventEl\x22></div>" +
-                            
+
+                            "<div class=\x22footer-text\x22 id=\x22footerText\x22></div>"+
+                            "<div class=\x22footer\x22><div class=\x22previous-button-2\x22 id=\x22previous_Button\x22 style=\x22visibility: hidden\x22 ><i class=\x22fas fa-arrow-circle-left fa-2x\x22></i></div>"+
+                            "<div class=\x22next-button-2\x22 id=\x22next_Button\x22 style=\x22visibility: hidden\x22 ><i class=\x22fas fa-arrow-circle-right fa-2x\x22></i></div></div>"+
+                            "<div class=\x22footer-container\x22 id=\x22footerslide\x22>"+
+
+                            // primaryTransportSlider +
+                            "</div>"+
+
+                            // // "<div class=\x22next-button\x22 id=\x22nextButton\x22 style=\x22visibility: hidden\x22 ><i class=\x22fas fa-arrow-circle-right fa-2x\x22></i></div>"+
+                            // "<div class=\x22next-button-2\x22 id=\x22nextButton\x22 style=\x22\x22 ><i class=\x22fas fa-arrow-circle-right fa-2x\x22></i></div>"+
+                            // "<div class=\x22footer-text\x22 id=\x22footerText\x22></div>"+
+                            // // "<div class=\x22previous-button\x22 id=\x22previousButton\x22 style=\x22visibility: hidden\x22 ><i class=\x22fas fa-arrow-circle-left fa-2x\x22></i></div>"+
+                            // "<div class=\x22previous-button-2\x22 id=\x22previousButton\x22 style=\x22\x22 ><i class=\x22fas fa-arrow-circle-left fa-2x\x22></i></div>"+
                     "</body>\n" +
                 
                     "</html>";
