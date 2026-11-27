@@ -255,7 +255,21 @@ export function InitConnect() {
                }
             }
          }
-      }   
+      } else {
+         let modelDataEl = document.getElementById('sceneModels');
+         if (modelDataEl) {
+            let modelsData = modelDataEl.getAttribute('data-models');
+            console.log("sceneModels data " + modelsData );
+            sceneModels = JSON.parse(atob(modelsData)); //convert from base64
+            // console.log("sceneModels " + JSON.stringify(sceneModels));
+            for (let i = 0; i < sceneModels.length; i++) {
+               if (sceneModels[i].sourceText != undefined && sceneModels[i].sourceText != 'undefined' && sceneModels[i].sourceText != null && sceneModels[i].sourceText.length > 0) {
+                  attributions.push("Name: " + sceneModels[i].name + " - Type: " + sceneModels[i].item_type + " - Source: " + sceneModels[i].sourceText);
+               }
+            }
+            console.log("sceneModels " + JSON.stringify(sceneModels));
+         }   
+      }
       // InitIDB();
    }
    // console.log("room: " +room + " vid " + settings.sceneVideoStreams + " type " + settings.sceneType);

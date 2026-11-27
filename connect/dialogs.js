@@ -1041,7 +1041,8 @@ function ReturnLocationModelSelect () {
       }  
 
     }
-   return modelSelect;
+    
+    return modelSelect;
 }
 function ReturnLocationObjectSelect (phID) {
   console.log("tryna find location object for objectSelect " + phID );

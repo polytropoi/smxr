@@ -32,7 +32,9 @@ function getExtension(filename) {
 function convertStringToObjectID (stringID) {
     stringID = stringID.toString();
     if (ObjectId.isValid(stringID)) {
-        return ObjectId.createFromHexString(stringID);
+        const oid = ObjectId.createFromHexString(stringID);
+        // console.log("oid "+ oid);
+        return oid;
     } else {
         return null;
     }
@@ -362,7 +364,7 @@ wgpu_router.get('/:_id', function (req, res) {
     let threejsVersion = "173";
     let surfaceScatterScript = "";
     let locationData = "";
-    let modelData = "";
+    let sceneModelsData = "";
     let objectData = "";
     let inventoryData = "";
     let joystickContainer  = "";
@@ -1435,6 +1437,43 @@ wgpu_router.get('/:_id', function (req, res) {
             //     }
             // }
 
+
+            ///////////////// scene models //////////////////
+            let modelz = [];
+            console.log("sceneModelss : " + JSON.stringify(sceneResponse.sceneModels));
+            if (sceneResponse.sceneModels != null && sceneResponse.sceneModels.length) {
+                const m_ids = sceneResponse.sceneModels.map(convertStringToObjectID);
+                const query = {"_id": {$in : m_ids}};
+                const models = await RunDataQuery("models", "find", query);
+                // console.log("sceneModels " + JSON.stringify(models));
+                    for (let model of models) {
+                        console.log("model " + JSON.stringify(model));
+                        if (model.item_type == "glb") {
+                            const url = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + model.userID + "/gltf/" + model.filename, 6000);
+                            model.url = url;
+                            modelz.push(model);
+                        } else if (model.item_type == "splat") {
+                            const url = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + model.userID + "/splat/" + model.filename, 6000);
+                            model.url = url;
+                            modelz.push(model);
+                        }
+                    }
+                
+                    console.log("sceneModelz " + JSON.stringify(modelz));
+                // for (let i = 0; i < sceneResponse.sceneModels.length; i++) {
+                //     var oo_id = ObjectId.createFromHexString(sceneResponse.sceneModels[i].toString());
+                //     const query = {"_id": oo_id};
+                //     const model = await RunDataQuery("models", "findOne", query);
+                //     if (model && model.userID) {
+                //         const url = await ReturnPresignedUrl(process.env.ROOT_BUCKET_NAME, 'users/' + model.userID + "/gltf/" + model.filename, 6000);
+                //         model.url = url;
+                //         modelz.push(model);
+                //     }
+                // }
+
+                const buff = Buffer.from(JSON.stringify(modelz)).toString("base64");
+                sceneModelsData = "<div id=\x22sceneModels\x22 data-models='"+buff+"'></div>";
+            }
 
         ///////////////// available scenes ///////////////////// 
 
@@ -2878,6 +2917,7 @@ wgpu_router.get('/:_id', function (req, res) {
                             availableScenesData +
                             objectData +
                             inventoryData +
+                            sceneModelsData +
                             
                         // cloudMarkerElements+ //? no need...
 
@@ -2895,13 +2935,13 @@ wgpu_router.get('/:_id', function (req, res) {
                             "<div id=\x22hic_content\x22 class=\x22hic_content_trans\x22></div>" +
                             "<div id=\x22eventEl\x22></div>" +
 
-                            "<div class=\x22footer-text\x22 id=\x22footerText\x22></div>"+
+                            // "<div class=\x22footer-text\x22 id=\x22footerText\x22></div>"+
                             "<div class=\x22footer\x22><div class=\x22previous-button-2\x22 id=\x22previous_Button\x22 style=\x22visibility: hidden\x22 ><i class=\x22fas fa-arrow-circle-left fa-2x\x22></i></div>"+
                             "<div class=\x22next-button-2\x22 id=\x22next_Button\x22 style=\x22visibility: hidden\x22 ><i class=\x22fas fa-arrow-circle-right fa-2x\x22></i></div></div>"+
-                            "<div class=\x22footer-container\x22 id=\x22footerslide\x22>"+
+                            // "<div class=\x22footer-container\x22 id=\x22footerslide\x22>"+
 
                             // primaryTransportSlider +
-                            "</div>"+
+                            // "</div>"+
 
                             // // "<div class=\x22next-button\x22 id=\x22nextButton\x22 style=\x22visibility: hidden\x22 ><i class=\x22fas fa-arrow-circle-right fa-2x\x22></i></div>"+
                             // "<div class=\x22next-button-2\x22 id=\x22nextButton\x22 style=\x22\x22 ><i class=\x22fas fa-arrow-circle-right fa-2x\x22></i></div>"+

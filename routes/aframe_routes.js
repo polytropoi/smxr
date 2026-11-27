@@ -44,6 +44,7 @@ function getExtension(filename) {
 function convertStringToObjectID (stringID) {
     stringID = stringID.toString();
     if (ObjectId.isValid(stringID)) {
+        // console.log("valid id " + stringID);
         return ObjectId.createFromHexString(stringID);
     } else {
         return null;
