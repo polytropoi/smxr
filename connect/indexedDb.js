@@ -5,7 +5,7 @@ import { room, sceneLocations, locationTimestamps, localData, userData, lastClou
    playerPosition, playerRotation } from "/connect/connect.js";
 
 import { settings, UpdateUserProfile, pixelsPerMeterActual, UpdateModdedLocations } from "/connect/settings.js";
-import { SetTimeKeysData, MapUpdate, equip_inventory_object_event, LocalDataLoaded } from "/connect/events.js";
+import { SetTimeKeysData, MapUpdate, equip_inventory_object_event, ClearLocalSceneData } from "/connect/events.js";
 // import { pixelsPerMeterActual } from "../vtt/vtt_main.mjs";
 export let hasLocalData = false;
 
@@ -327,15 +327,17 @@ export function InitIDB() {
          InitLocalColors();
 
          let lastLocalUpdate = localData.lastUpdate;
-         // console.log("COPIED LOCALDATA locations length " + localData.locations.length + " " + JSON.stringify(localData) + " last cloud update " +  lastCloudUpdate + " vs last local update " + lastLocalUpdate);
+         console.log("COPIED LOCALDATA locations length " + localData.locations.length + " last cloud update " +  lastCloudUpdate + " vs last local update " + lastLocalUpdate);
          if (lastCloudUpdate && lastLocalUpdate) {
             if (lastCloudUpdate > lastLocalUpdate) {
                console.log("MIGHTY CLOUD MODS ABOUT TO STEP ON YOUR PUNY LOCAL MODS");
-               this.dialogEl = document.getElementById('mod_dialog');
+               this.dialogEl = document.getElementById('mod_dialog'); //aframe
                if (this.dialogEl) {
                   this.dialogEl.components.mod_dialog.showPanel("WARNING: RECENT CLOUD MODS MUST STEP ON YOUR LOCAL MODS!", null, "recentCloudMods" ); //param 2 is objID when needed
+               } else {
+                  ClearLocalSceneData(); //fires a data_event
                }
-               
+              
             } else {
                console.log("COPIED LOCALDATA locations length " + localData.locations.length + " last cloud update " +  lastCloudUpdate + " vs last local update " + lastLocalUpdate);
             }

@@ -378,8 +378,6 @@ export async function InstanceOnSurface (model, count, scaleFactor, yMod, shader
                     await CreateNPCAgent(true, null, animations, i.toString(), locData, locData.objectData, sceneObjectID, scale);
                 
                 }
-               
-                // kinematicAgentMeshes.push(physicsColliderMesh); //load later after settledown
             }
             dummy.updateMatrix(); // Update matrix based on position/rotation
             for (let m = 0; m < instancedMeshes.length; m++) {

@@ -31,7 +31,7 @@ import { UpdateModdedLocations, mods } from '../../connect/settings.js';
 // import { eventEl, location_event } from '../../connect/events.js';
 import { SaveLocalData } from '../../connect/indexedDb.js';
 
-import { lookAtCameraObjects } from './wgpu_ui.js';
+import { lookAtCameraObjects, ShowHTMLPopup } from './wgpu_ui.js';
 
 import { splatObjex } from './wgpu_main.mjs';
 import { PsychNoiseMaterial } from './wgpu_fx.js';
@@ -216,7 +216,7 @@ export async function LocationEvent (event) {
 }
 
 export async function InitLocations() {
-    eventEl.addEventListener('data-event', LocalDataReady);
+    eventEl.addEventListener('data-event', LocalDataEvent);
 
     let modelsDataEl = document.getElementById('modelsData'); //"simple" entities, static or basic interaction
     if (modelsDataEl) {
@@ -464,10 +464,20 @@ function getObjectsByPartialName(parent, partialName) {
   return results;
 }
 
-function LocalDataReady () {
-    console.log("localData is ready");
-    localDataReady = true;
-    LoadLocalMods();
+function LocalDataEvent (event) { //hrm, here or elsewhere?
+    if (event.details.type == "idbloaded" ) {
+        console.log("localData is ready");
+        localDataReady = true;
+        LoadLocalMods();
+    } 
+    if (event.details.type == "clearLocalData" ) {
+        //html 
+        const htmlstring = "<h4>Cloud mods will override on your local mods!</h4>" +
+                    
+                    "<button id=\x22popup_cancelButton\x22 class=\x22hicCancelButton\x22>Cancel</button> <button id=\x22popup_yesButton\x22 data-type=\x22clearLocalSceneData\x22 class=\x22yesButton\x22>OK</button>";
+                    // ShowHTMLPopup(null, avatarHtmlString, null, null, null);
+                    ShowHTMLPopup(event, htmlstring, null, null, null);
+    }
 }
 
 export function LoadLocalMods(event) {
@@ -961,7 +971,7 @@ async function LoadLocationModel (url, locationData, isActive) {
             if (child.name  && child.name != undefined && typeof child.name === 'string') {
                 const name = child.name.toString();
                 
-                console.log("child.name is " + name);
+                // console.log("child.name is " + name);
                 if (name.includes("point_light")) {
                     
                     child.getWorldPosition(worldPos);

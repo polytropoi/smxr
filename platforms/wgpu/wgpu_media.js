@@ -1242,7 +1242,7 @@ export class ScenePicture {
 
         this.hideAllPanels();
         this.pictureItem = ReturnPictureFromGroup(this.locationGroupID, this.pictureGroupIndexes[this.locationGroupID]);
-        console.log("pictureITem " + JSON.stringify(this.pictureItem));
+        // console.log("pictureITem " + JSON.stringify(this.pictureItem));
 
         if (this.pictureItem.orientation == "Landscape") {
                       

@@ -1450,6 +1450,7 @@ export function centerRaycast() {
 export function onHicClick (event) {
     console.log("hic click " + event.target.id);
 }
+
 export function onMouseDown(event) { // on threejs object
     // playerReadyToNav = true;
     console.log("mousedown event " + event.target.id + " " + lastHitObjectName);

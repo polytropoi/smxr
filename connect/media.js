@@ -648,9 +648,11 @@ export function LoadPrimaryAudioHowl () {
       SetPrimaryAudioEventsData();
     }
     const primaryAudioParentEl = document.getElementById("primaryAudioParent");
-    currentAudioFileName = primaryAudioParentEl.dataset.primaryaudiotitle;
-      
-    console.log("primary audio title " + currentAudioFileName);
+    if (primaryAudioParentEl) {
+      currentAudioFileName = primaryAudioParentEl.dataset.primaryaudiotitle;
+        
+      console.log("primary audio title " + currentAudioFileName);
+    }
     // return primaryAudioHowl;
   }
 }
@@ -1053,8 +1055,9 @@ export async function createYouTubePlayer() {
     
     let youtubeEl = document.getElementById("youtubeElement");
     let yt_id = youtubeEl.getAttribute('data-yt_id');
+    let yt_player_model = youtubeEl.getAttribute('data-player_model_url');
     if (youtubeEl) {
-      console.log("YOUTUBE API IS READY, tryna make a player with id " + yt_id ); 
+      console.log("YOUTUBE API IS READY, tryna make a player with id " + yt_id + " playermodel " + yt_player_model); 
 
       return new Promise((resolve) => {
         window.youtubePlayer = new YT.Player(youtubeEl, {

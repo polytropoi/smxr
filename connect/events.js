@@ -90,7 +90,18 @@ export function SettingsLoaded() {
 
 export function LocalDataLoaded() {
    console.log("localmods data loaded from indexedDb!");
-   data_event.details = "idbloaded";
+   const details = {};
+   details.type = "idbloaded";
+   data_event.details = details;
+   eventEl.dispatchEvent(data_event);
+}
+
+export function ClearLocalSceneData() {
+   console.log("tryna clear local scene data ");
+   // data_event.details = "clearLocalData";
+   const details = {};
+   details.type = "clearLocalData";
+   data_event.details = details;
    eventEl.dispatchEvent(data_event);
 }
 

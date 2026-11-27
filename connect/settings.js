@@ -50,6 +50,8 @@ export function UpdateModdedLocations (location) { //called from indexeddb
    console.log("updated modded locations " + mods.locations.length);
 }
 
+
+
 // export function UpdateMapDimensions(x, y) {
 //    mapWidth = x;
 //    mapHeight = y;

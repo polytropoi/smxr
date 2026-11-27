@@ -2142,10 +2142,11 @@ wgpu_router.get('/:_id', function (req, res) {
             } 
             
             if (sceneResponse.sceneYouTubeIDs != null && sceneResponse.sceneYouTubeIDs.length > 0) {
+                // youtubePlayerModelURL = "https://servicemedia.s3.amazonaws.com/assets/models/youtubeplayer2.glb";
                 let youtubeVolume = sceneResponse.sceneMediaAudioVolume != undefined ? sceneResponse.sceneMediaAudioVolume : 80;
                 for (let i = 0; i < sceneResponse.sceneYouTubeIDs.length; i++) {
                     youtubeContent = "<div width=\x22240\x22 id=\x22youtubeElement\x22 data-yt_id=\x22"+
-                    sceneResponse.sceneYouTubeIDs[i]+"\x22 data-sceneTitle=\x22"+sceneResponse.sceneTitle+"\x22></div>"+
+                    sceneResponse.sceneYouTubeIDs[i]+"\x22 data-sceneTitle=\x22"+sceneResponse.sceneTitle+"\x22 data-player_model_url=\x22https://servicemedia.s3.amazonaws.com/assets/models/youtubeplayer2.glb\x22></div>"+
                     "<script>\n"+
                         "var tag = document.createElement('script');\n"+
                         "tag.src = \x22//www.youtube.com/iframe_api\x22;\n"+
@@ -2540,6 +2541,7 @@ wgpu_router.get('/:_id', function (req, res) {
                     settings.sceneTitle = sceneResponse.sceneTitle;
                     settings.sceneKeynote = sceneResponse.sceneKeynote;
                     settings.sceneDescription = sceneResponse.sceneDescription;
+                    settings.sceneLastUpdate = sceneResponse.sceneLastUpdate;
                     settings.sceneEventStart = sceneResponse.sceneEventStart;
                     settings.sceneEventEnd = sceneResponse.sceneEventEnd;
                     settings.sceneEnvironmentSettings = sceneEnvironmentSettings;
